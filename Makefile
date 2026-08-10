@@ -1,0 +1,180 @@
+.SILENT:
+SHELL := /bin/bash
+all: help
+
+# ======================================================================================================
+# 数据采集模板项目 Makefile
+# ======================================================================================================
+
+# 公共命令：自动检测可用的 Python 解释器
+PYTHON_CMD := $(shell set -e; for X in python3 python py; do if command -v $$X >/dev/null 2>&1; then if $$X --version >/dev/null 2>&1; then echo $$X; break; fi; fi; done)
+
+# 检查是否在WSL或Linux/Mac环境
+define check_wsl_linux_mac
+	@if [ -n "$(ComSpec)" ] || [ -n "$${COMSPEC}" ]; then \
+		echo "❌ 仅限WSL或Linux/Mac环境..."; \
+		exit 1; \
+	fi
+endef
+
+# UV安装函数
+define install_uv
+	@bash -c ' \
+		if command -v uv >/dev/null 2>&1; then \
+			echo "✅ UV 已安装: $$(uv --version)"; \
+		else \
+			echo "📦 UV 未安装，正在自动安装..."; \
+			case "$$(uname -s)" in \
+				Linux*|Darwin*) \
+					echo "🌐 正在从 https://astral.sh/uv/install.sh 下载安装..."; \
+					if curl -LsSf https://astral.sh/uv/install.sh | sh; then \
+						export PATH="$${HOME}/.local/bin:$${PATH}"; \
+						echo "🎉 UV 安装成功: $$(uv --version)"; \
+					else \
+						echo "❌ 网络错误或超时，请手动安装 uv"; \
+						exit 1; \
+					fi \
+					;; \
+				MINGW*|MSYS*|CYGWIN*|Windows*) \
+					echo "🔧 检测到 Windows 系统，尝试使用 PowerShell 安装..."; \
+					powershell -ExecutionPolicy ByPass -Command "\
+						$$tempFile = \"$$env:TEMP\\uv_install.ps1\"; \
+						(New-Object System.Net.WebClient).DownloadFile('https://astral.sh/uv/install.ps1', $$tempFile); \
+						& $$tempFile \
+					" && \
+					echo "🎉 UV 安装完成，请重启终端"; \
+					;; \
+				*) \
+					echo "❌ 不支持的操作系统: $$(uname -s)"; \
+					exit 1 \
+					;; \
+			esac; \
+		fi'
+endef
+
+# 检查并安装全局工具
+define install_tool
+	@if ! uv tool list | grep -q "$1"; then \
+		echo "📦 Installing $1..."; \
+		uv tool install $1 --quiet; \
+		echo "✅ $1 installed"; \
+	fi
+endef
+
+# 基础清理函数
+define clean_handler
+	@echo "📂 清理 Python 缓存文件..."
+	@rm -rf __pycache__ .pytest_cache .coverage output/
+	@find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true
+	@find . -type d -name "__pycache__" -delete 2>/dev/null || true
+	@echo "💾 清理日志和临时文件..."
+	@rm -rf logs/ tmp/ temp/
+	@find . -type f \( -name "*.log" -o -name "*.tmp" -o -name "*.swp" -o -name "*~" \) -delete 2>/dev/null || true
+	@echo "📦 清理构建产物..."
+	@rm -rf dist/ build/ .eggs/ *.egg-info/
+	@echo "✅ 清理完成"
+endef
+
+# ======================================================================================================
+
+#HELP help@查看帮助
+.PHONY: help
+help: Makefile
+	@echo "Usage:  make [command] [options]"
+	@echo
+	@echo "Available Commands:"
+	@sed -n "s/^#HELP//p" $(firstword $(MAKEFILE_LIST)) | awk -F'@' '{ printf "  \033[1;31m%-16s\033[0m%s\n", $$1, $$2 }'
+	@echo
+
+
+#HELP init@初始化环境
+.PHONY: init
+init:
+	@echo "🌌 初始化环境..."
+	$(call install_uv)
+	@if [ ! -d ".venv" ]; then \
+		echo "📦 创建虚拟环境..."; \
+		uv venv; \
+	fi
+	@echo "📥 安装依赖..."
+	uv sync
+	@echo "✅ 环境初始化完成"
+
+
+#HELP clean@清理项目
+.PHONY: clean
+clean:
+	$(call clean_handler)
+
+
+#HELP format@格式化代码
+.PHONY: format
+format:
+	$(call install_tool,ruff)
+	@echo "📝 格式化代码..."
+	@uv tool run ruff format . --target-version py310
+	@echo "✅ 格式化完成"
+
+
+#HELP lint@代码检查
+.PHONY: lint
+lint:
+	$(call install_tool,ruff)
+	@echo "🔍 代码检查..."
+	@uv tool run ruff check src/ --fix || true
+	@echo "✅ 检查完成"
+
+
+#HELP test@运行测试
+.PHONY: test
+test:
+	@echo "🧪 运行测试..."
+	@mkdir -p output
+	@uv run pytest tests/ -v --cov=src --cov-report=html:output/htmlcov
+	@echo "✅ 测试完成，报告位于 output/htmlcov/"
+
+
+#HELP run@运行采集（单个）
+#  make run SOURCE=alerion
+SOURCE ?= alerion
+.PHONY: run
+run:
+	@echo "🚀 运行采集器: $(SOURCE)..."
+	@uv run python src/main.py run --source=$(SOURCE)
+
+
+#HELP run-all@运行所有采集器
+.PHONY: run-all
+run-all:
+	@echo "🚀 运行所有采集器..."
+	@uv run python src/main.py run-all
+
+
+#HELP dry-run@试运行（不保存）
+.PHONY: dry-run
+dry-run:
+	@echo "🚀 试运行所有采集器（不保存）..."
+	@uv run python src/main.py run-all --dry-run
+
+
+#HELP scheduler@启动定时调度
+.PHONY: scheduler
+scheduler:
+	@echo "⏰ 启动定时调度..."
+	@uv run python src/main.py scheduler
+
+
+#HELP api@启动 API 服务
+.PHONY: api
+api:
+	@echo "🌐 启动 API 服务..."
+	@uv run python src/main.py api
+
+
+#HELP list@列出所有采集器
+.PHONY: list
+list:
+	@uv run python src/main.py list
+
+
+
