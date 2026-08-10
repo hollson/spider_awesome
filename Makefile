@@ -143,11 +143,24 @@ run:
 	@uv run python src/main.py run --source=$(SOURCE)
 
 
-#HELP run-all@运行所有采集器
+#HELP run-all@运行所有采集器（串行）
 .PHONY: run-all
 run-all:
-	@echo "🚀 运行所有采集器..."
+	@echo "🚀 运行所有采集器（串行）..."
 	@uv run python src/main.py run-all
+
+
+#HELP run-parallel@并行运行采集器
+#  make run-parallel COLLECTORS=alerion,asl
+COLLECTORS ?=
+.PHONY: run-parallel
+run-parallel:
+	@echo "🚀 并行运行采集器..."
+	@if [ -n "$(COLLECTORS)" ]; then \
+		uv run python src/main.py run-parallel --collectors=$(COLLECTORS); \
+	else \
+		uv run python src/main.py run-parallel; \
+	fi
 
 
 #HELP dry-run@试运行（不保存）
@@ -164,17 +177,13 @@ scheduler:
 	@uv run python src/main.py scheduler
 
 
-#HELP api@启动 API 服务
-.PHONY: api
-api:
-	@echo "🌐 启动 API 服务..."
-	@uv run python src/main.py api
-
-
 #HELP list@列出所有采集器
 .PHONY: list
 list:
 	@uv run python src/main.py list
 
 
-
+#HELP status@查看任务状态
+.PHONY: status
+status:
+	@uv run python src/main.py status

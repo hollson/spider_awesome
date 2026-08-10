@@ -5,25 +5,27 @@
 ## 架构设计
 
 ```
-├── src/
-│   ├── collector/      # 采集层：数据拉取
-│   ├── processor/      # 处理层：清洗、校验
-│   ├── storage/        # 存储层：持久化
-│   ├── expose/         # API 层：对外服务
-│   ├── scheduler/      # 调度层：定时任务
-│   ├── common/         # 公共层：工具库
-│   ├── db/             # ORM：数据模型
-│   ├── env_loader.py   # 环境配置加载器
-│   └── settings.py     # 配置类
-├── configs/            # 环境配置文件
-│   ├── .env            # 公共基础配置
-│   ├── .env.dev        # 开发环境
-│   ├── .env.test       # 测试环境
-│   ├── .env.prod       # 生产环境（占位符）
-│   └── .env.local      # 个人本地覆盖（不提交）
-├── data/               # 数据目录
-├── logs/               # 日志目录
-└── tests/              # 测试目录
+src/
+├── collector/      # 采集层：数据拉取
+│   ├── base_collector.py   # 采集器抽象基类
+│   ├── registry.py         # 采集器注册表
+│   └── providers/          # 具体采集器实现
+├── processor/      # 处理层：清洗、校验
+│   ├── cleaner.py          # 数据清洗
+│   └── validator.py        # 数据校验
+├── storage/        # 存储层：持久化（SQLAlchemy）
+│   └── mysql_store.py      # MySQL 存储
+├── scheduler/      # 调度层：定时任务
+│   ├── task_manager.py     # 任务管理器（并发控制、失败重试）
+│   └── tasks.py            # 任务定义
+├── common/         # 公共层：工具库
+│   ├── logger.py           # 日志
+│   ├── http_client.py      # HTTP 客户端
+│   └── utils.py            # 工具函数
+├── db/             # ORM：数据模型（SQLAlchemy）
+├── env_loader.py   # 环境配置加载器
+├── settings.py     # 配置类
+└── main.py         # 主入口
 ```
 
 ## 快速开始
@@ -52,27 +54,23 @@ vim configs/.env.local
 # 执行单个采集器
 uv run python src/main.py run --source=alerion
 
-# 执行所有采集器
+# 执行所有采集器（串行）
 uv run python src/main.py run-all
 
-# 仅采集不保存（Dry Run）
-uv run python src/main.py run-all --dry-run
+# 并行执行采集器
+uv run python src/main.py run-parallel
 
-# 列出所有可用采集器
-uv run python src/main.py list
+# 并行指定采集器
+uv run python src/main.py run-parallel --collectors=alerion,asl
+
+# 试运行（不保存）
+uv run python src/main.py run-all --dry-run
 ```
 
 ### 4. 启动定时调度
 
 ```bash
 uv run python src/main.py scheduler
-```
-
-### 5. 启动 API 服务
-
-```bash
-uv run python src/main.py api
-# 访问 http://localhost:8000/docs 查看接口文档
 ```
 
 ## 环境切换
@@ -82,21 +80,44 @@ uv run python src/main.py api
 ```bash
 # Linux / macOS
 ENV_MODE=dev uv run python src/main.py run-all
-ENV_MODE=test uv run python src/main.py run-all
-ENV_MODE=prod uv run python src/main.py run-all
-
-# Windows CMD
-set ENV_MODE=prod && uv run python src/main.py run-all
+ENV_MODE=prod uv run python src/main.py scheduler
 
 # Windows PowerShell
-$env:ENV_MODE="prod"; uv run python src/main.py run-all
+$env:ENV_MODE="prod"; uv run python src/main.py scheduler
 ```
 
-**配置加载优先级**（高 → 低）：
-1. 系统环境变量
-2. `configs/.env.local`（个人覆盖）
-3. `configs/.env.{mode}`（环境专属）
-4. `configs/.env`（公共基础）
+## 调度配置
+
+### 串行模式（默认）
+
+每个采集器独立调度，在 `configs/.env` 中配置：
+
+```ini
+# 全局默认调度时间
+COLLECTOR_CRON_HOUR=0
+COLLECTOR_CRON_MINUTE=0
+
+# 单独配置某个采集器（可选）
+# COLLECTOR_CRON_ALERION_HOUR=6
+# COLLECTOR_CRON_ALERION_MINUTE=30
+```
+
+### 并行模式
+
+所有采集器并行执行：
+
+```ini
+SCHEDULER_PARALLEL=true
+MAX_WORKERS=5
+```
+
+### 任务配置
+
+```ini
+TASK_TIMEOUT=300      # 单任务超时（秒）
+RETRY_COUNT=3         # 失败重试次数
+RETRY_DELAY=60        # 重试间隔（秒）
+```
 
 ## 内置采集器示例
 
@@ -108,7 +129,7 @@ $env:ENV_MODE="prod"; uv run python src/main.py run-all
 
 ## 添加新采集器
 
-1. 在 `src/collector/` 下创建新文件
+1. 在 `src/collector/providers/` 下创建新文件
 2. 继承 `BaseCollector` 并实现 `fetch()` 方法
 3. 在 `src/collector/registry.py` 中注册
 
@@ -125,9 +146,26 @@ class MyCollector(BaseCollector):
         return [{"id": "1", "source": "my_source", ...}]
 ```
 
+## Makefile 命令
+
+| 命令 | 说明 |
+|------|------|
+| `make init` | 初始化环境 |
+| `make run SOURCE=alerion` | 运行单个采集器 |
+| `make run-all` | 运行所有采集器（串行） |
+| `make run-parallel` | 并行运行采集器 |
+| `make dry-run` | 试运行（不保存） |
+| `make scheduler` | 启动定时调度 |
+| `make list` | 列出所有采集器 |
+| `make status` | 查看任务状态 |
+| `make format` | 格式化代码 |
+| `make lint` | 代码检查 |
+| `make test` | 运行测试 |
+| `make clean` | 清理项目 |
+
 ## 开发规范
 
-1. **分层解耦**: 采集 / 处理 / 存储 / 暴露四层独立
+1. **分层解耦**: 采集 / 处理 / 存储 / 调度四层独立
 2. **配置分离**: `.env` 存敏感信息，代码通过 `settings` 单例访问
 3. **单条容错**: 单条数据失败不阻断整批任务
 4. **原始留存**: `data/raw` 目录永久保留原始数据

@@ -34,7 +34,7 @@ venv.bak/
 
 # IDE
 .idea/
-.vscode/
+# .vscode/
 *.sublime-project
 *.sublime-workspace
 *~

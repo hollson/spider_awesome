@@ -1,0 +1,111 @@
+{
+	// ============================================================
+	// 通用编辑器设置
+	// ============================================================
+	"editor.formatOnSave": true,
+	"editor.formatOnType": false,
+	"editor.tabSize": 4,
+	"editor.insertSpaces": true,
+	"files.eol": "\n",
+	"editor.suggest.snippetsPreventQuickSuggestions": false,
+	"makefile.configureOnOpen": true,
+
+	// ============================================================
+	// Python
+	// ============================================================
+	"python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+	"python.formatting.provider": "black",
+	"python.formatting.blackArgs": ["--line-length", "120"],
+	"python.linting.enabled": true,
+	"python.linting.pylintEnabled": true,
+	"python.linting.flake8Enabled": false,
+	"python.linting.pylintArgs": ["--max-line-length=120", "--disable=W0511", "--disable=C0114"],
+	"python.analysis.completeFunctionParens": true,
+	"python.analysis.typeCheckingMode": "basic",
+	"python.terminal.activateEnvironment": false,
+
+	// ============================================================
+	// Frontend / TypeScript / JavaScript
+	// ============================================================
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.organizeImports": "explicit"
+	},
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"typescript.updateImportsOnFileMove.enabled": "always",
+	"javascript.updateImportsOnFileMove.enabled": "always",
+	"eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+	"eslint.workingDirectories": [{ "mode": "auto" }],
+	"prettier.requireConfig": true,
+	"tailwindcss.includeLanguages": {
+		"typescript": "typescript",
+		"typescriptreact": "typescript"
+	},
+
+	// ============================================================
+	// 语言特定格式化器
+	// ============================================================
+	"[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[javascriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.wordWrap": "on"
+	},
+	"[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+
+	// ============================================================
+	// 文件资源管理器排除
+	// ============================================================
+	"files.exclude": {
+		"**/__pycache__": true,
+		"**/.pytest_cache": true,
+		"**/.mypy_cache": true,
+		"**/.ruff_cache": true,
+		"**/venv": true,
+		"**/.venv": true,
+		"**/.idea": true,
+		// "**/.trae": true,
+		"**/.github": true,
+		"**/.docker": true,
+		"**/.git": true,
+		"**/.next": true,
+		"**/node_modules": true,
+		"**/.turbo": true,
+		"**/.vercel": true,
+		"**/.output": true,
+		"**/.qoder": true,
+		"**/.cache": true,
+		"**/logs": true,
+		"**/backup": true,
+		"**/_legacy": true,
+		"**/dist": true,
+		"**/.pre-commit-hooks": true,
+		"**/*.egg-info": true
+	},
+
+	// ============================================================
+	// 文件嵌套模式
+	// ============================================================
+	"explorer.fileNesting.patterns": {
+		// Python
+		"*.py": "${capture}_test.py,__${capture}__.py",
+		"*.html": "${capture}.css,${capture}.js,${capture}.json",
+		"pyproject.toml": ".python-version,.gitattributes,.editorconfig,uv.lock,alembic.ini,.gitlab-ci.yml,setup.cfg,.pre-commit-config.yaml,requirements-dev.txt,requirements.txt,MANIFEST.in",
+		"main.py": "__init__.py,cli.py",
+		"Dockerfile": ".dockerignore,docker-compose.yml,docker-compose.*.yml,.dockerignore,Dockerfile*",
+
+		// 前端
+		"package.json": "pnpm-*,yarn.lock,package-lock.json,.npmrc,.nvmrc,tsconfig*,next.config.*,next-env.d.ts,.next/,*.config.js,*.config.ts,*.config.mjs,.pre-commit*,.prettierrc,jest.setup.js,.commitlintrc.js,.gitlab-ci.yml,.github-ci.yml,components.json,.prettierignore,.editorconfig",
+
+		// 通用
+		// ".env": ".env.example,.env.dev,.env.local,.env.development,.env.prod,.env.production,.env.test",
+		// ".env.dev": ".env.dev,.env.local,.env.development,.env.prod,.env.production,.env.test",
+		// ".env*": ".env.example,.env.local,.env.development,.env.production,.env.test,.env.prod,.env.dev",
+		"README.md": "README.zh.md,README.en.md,LICENSE,SECURITY.md,CONTRIBUTING.md,.gitignore"
+	}
+}

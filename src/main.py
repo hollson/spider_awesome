@@ -1,6 +1,6 @@
 """
 数据采集模板项目 - 主入口
-支持多种运行模式：采集、调度、API 服务
+支持多种运行模式：采集、调度
 """
 import argparse
 import sys
@@ -56,56 +56,67 @@ def cmd_run(args):
 
 def cmd_run_all(args):
     """执行所有采集器"""
+    from src.scheduler.tasks import run_all_collectors
+
     logger.info("开始执行所有采集任务")
+    result = run_all_collectors()
 
-    collectors = list_collectors()
-    logger.info(f"可用采集器: {collectors}")
+    if not args.dry_run:
+        logger.info(f"采集完成: 成功 {result['success']}/{result['total']}")
 
-    cleaner = Cleaner()
-    validator = Validator()
-    storage = MySQLStorage(auto_create=True) if not args.dry_run else None
 
-    for name in collectors:
-        try:
-            logger.info(f"\n{'='*50}")
-            logger.info(f"采集器: {name}")
-            logger.info(f"{'='*50}")
+def cmd_run_parallel(args):
+    """并行执行采集器"""
+    from src.scheduler.tasks import run_parallel_collectors
 
-            collector = get_collector(name)
-            records = collector.fetch()
-            records = cleaner.process(records)
-            records = validator.process(records)
+    # 解析采集器列表
+    collector_names = args.collectors.split(",") if args.collectors else None
 
-            if storage:
-                saved = storage.save(records)
-                logger.info(f"[{name}] 保存 {saved} 条数据")
-            else:
-                logger.info(f"[{name}] 采集 {len(records)} 条数据 (Dry Run)")
+    logger.info("开始并行采集任务")
+    result = run_parallel_collectors(collector_names)
 
-        except Exception as e:
-            logger.error(f"[{name}] 采集失败: {e}")
-            continue
+    if not args.dry_run:
+        logger.info(f"并行采集完成: 成功 {result['success']}/{result['total']}")
 
 
 def cmd_scheduler(args):
     """启动定时调度"""
     from src.scheduler.task_manager import task_manager
-    from src.scheduler.tasks import run_all_collectors
+    from src.scheduler.tasks import run_all_collectors, run_parallel_collectors
 
     logger.info("启动定时调度模式")
 
-    # 添加定时任务
-    task_manager.add_cron_job(
-        job_id="daily_collect",
-        func=run_all_collectors,
-        hour=settings.COLLECTOR_CRON_HOUR,
-        minute=settings.COLLECTOR_CRON_MINUTE,
-    )
+    # 获取调度配置
+    cron_config = settings.COLLECTOR_CRON
+    parallel_mode = settings.SCHEDULER_PARALLEL
+
+    if parallel_mode:
+        # 并行模式：所有采集器并行执行
+        task_id = "parallel_collect"
+        task_manager.add_cron_job(
+            job_id=task_id,
+            func=run_parallel_collectors,
+            hour=settings.COLLECTOR_CRON_HOUR,
+            minute=settings.COLLECTOR_CRON_MINUTE,
+        )
+        logger.info(f"添加并行采集任务: {task_id}")
+    else:
+        # 串行模式：每个采集器独立调度
+        for collector_name, cron in cron_config.items():
+            task_id = f"collect_{collector_name}"
+            task_manager.add_cron_job(
+                job_id=task_id,
+                func=lambda name=collector_name: run_all_collectors(),
+                hour=cron.get("hour", 0),
+                minute=cron.get("minute", 0),
+            )
+            logger.info(f"添加采集任务: {task_id}")
 
     # 启动调度器
     task_manager.start()
-    logger.info(f"调度器已启动，每天 {settings.COLLECTOR_CRON_HOUR:02d}:{settings.COLLECTOR_CRON_MINUTE:02d} 执行采集")
-    logger.info("按 Ctrl+C 停止")
+    logger.info("调度器已启动，按 Ctrl+C 停止")
+    logger.info("任务列表:")
+    task_manager.list_jobs()
 
     try:
         while True:
@@ -114,23 +125,6 @@ def cmd_scheduler(args):
     except KeyboardInterrupt:
         task_manager.stop()
         logger.info("调度器已停止")
-
-
-def cmd_api(args):
-    """启动 API 服务"""
-    logger.info("启动 API 服务模式")
-
-    try:
-        import uvicorn
-        uvicorn.run(
-            "src.expose.server:app",
-            host=settings.SERVER_HOST,
-            port=settings.SERVER_PORT,
-            reload=args.reload,
-        )
-    except ImportError:
-        logger.error("uvicorn 未安装，请执行: pip install uvicorn")
-        sys.exit(1)
 
 
 def cmd_list(args):
@@ -143,18 +137,37 @@ def cmd_list(args):
     print()
 
 
+def cmd_status(args):
+    """查看任务状态"""
+    from src.scheduler.task_manager import task_manager
+
+    status = task_manager.get_all_status()
+    if not status:
+        print("暂无任务执行记录")
+        return
+
+    print("\n任务执行状态:")
+    print("-" * 60)
+    for record in status:
+        print(f"  {record['task_id']}: {record['status']} "
+              f"(耗时 {record['duration']}s, "
+              f"成功 {record['success_count']}/{record['total_count']})")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="数据采集模板项目",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  python src/main.py run --source=alerion     # 执行单个采集器
-  python src/main.py run-all                   # 执行所有采集器
-  python src/main.py run-all --dry-run         # 执行所有采集器（不保存）
-  python src/main.py scheduler                 # 启动定时调度
-  python src/main.py api                       # 启动 API 服务
-  python src/main.py list                      # 列出所有采集器
+  python src/main.py run --source=alerion         # 执行单个采集器
+  python src/main.py run-all                       # 执行所有采集器（串行）
+  python src/main.py run-all --dry-run             # 试运行（不保存）
+  python src/main.py run-parallel                  # 并行执行所有采集器
+  python src/main.py run-parallel --collectors=alerion,asl  # 并行指定采集器
+  python src/main.py scheduler                     # 启动定时调度
+  python src/main.py list                          # 列出所有采集器
+  python src/main.py status                        # 查看任务状态
         """,
     )
 
@@ -167,22 +180,27 @@ def main():
     run_parser.set_defaults(func=cmd_run)
 
     # run-all 命令
-    run_all_parser = subparsers.add_parser("run-all", help="执行所有采集器")
+    run_all_parser = subparsers.add_parser("run-all", help="执行所有采集器（串行）")
     run_all_parser.add_argument("--dry-run", action="store_true", help="仅采集不保存")
     run_all_parser.set_defaults(func=cmd_run_all)
+
+    # run-parallel 命令
+    run_parallel_parser = subparsers.add_parser("run-parallel", help="并行执行采集器")
+    run_parallel_parser.add_argument("--collectors", "-c", help="采集器列表（逗号分隔）")
+    run_parallel_parser.add_argument("--dry-run", action="store_true", help="仅采集不保存")
+    run_parallel_parser.set_defaults(func=cmd_run_parallel)
 
     # scheduler 命令
     scheduler_parser = subparsers.add_parser("scheduler", help="启动定时调度")
     scheduler_parser.set_defaults(func=cmd_scheduler)
 
-    # api 命令
-    api_parser = subparsers.add_parser("api", help="启动 API 服务")
-    api_parser.add_argument("--reload", action="store_true", help="热重载模式")
-    api_parser.set_defaults(func=cmd_api)
-
     # list 命令
     list_parser = subparsers.add_parser("list", help="列出所有采集器")
     list_parser.set_defaults(func=cmd_list)
+
+    # status 命令
+    status_parser = subparsers.add_parser("status", help="查看任务状态")
+    status_parser.set_defaults(func=cmd_status)
 
     args = parser.parse_args()
 
