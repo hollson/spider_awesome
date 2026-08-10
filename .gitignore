@@ -18,7 +18,6 @@ lib/
 lib64/
 parts/
 sdist/
-var/
 wheels/
 *.egg-info/
 .installed.cfg
@@ -42,19 +41,11 @@ venv.bak/
 *.swo
 
 # 环境变量（敏感信息）
-.env
 .env.local
-.env.production
 configs/.env.local
 
-# 日志
-logs/
-*.log
-
-# 数据目录
-data/raw/
-data/processed/
-data/cache/
+# var 目录（缓存、数据库、日志、临时文件）
+var/
 
 # 临时文件
 *.bak
@@ -63,8 +54,6 @@ data/cache/
 tmp/
 backup/
 _legacy/
-
-
 
 # 系统文件
 .DS_Store
@@ -79,13 +68,6 @@ htmlcov/
 # 打包
 *.whl
 *.tar.gz
-
-# 数据库
-*.db
-*.sqlite3
-
-# 旧文件备份
-_legacy/
 
 # uv 生成的 requirements
 requirements*.txt

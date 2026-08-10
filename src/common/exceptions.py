@@ -2,6 +2,7 @@
 自定义异常类
 统一管理项目中的异常类型
 """
+from typing import Any
 
 
 class DataCollectorError(Exception):

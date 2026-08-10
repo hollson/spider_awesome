@@ -11,7 +11,7 @@ class Settings:
     """应用配置集中管理"""
 
     # ========== 应用基础 ==========
-    APP_NAME: str = os.getenv("APP_NAME", "data-collector")
+    APP_NAME: str = os.getenv("APP_NAME", "spider_awesome")
     APP_VERSION: str = os.getenv("APP_VERSION", "1.0.0")
     ENV_MODE: str = os.getenv("ENV_MODE", "dev")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
@@ -20,26 +20,34 @@ class Settings:
     SERVER_HOST: str = os.getenv("SERVER_HOST", "0.0.0.0")
     SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8000"))
 
-    # ========== MySQL ==========
+    # ========== 数据库类型 ==========
+    # 可选: sqlite, postgresql, mysql
+    DB_TYPE: str = os.getenv("DB_TYPE", "sqlite")
+
+    # ========== SQLite 配置 ==========
+    SQLITE_PATH: str = os.getenv("SQLITE_PATH", "var/data/spider_awesome.db")
+
+    # ========== PostgreSQL 配置 ==========
+    PG_HOST: str = os.getenv("PG_HOST", "127.0.0.1")
+    PG_PORT: int = int(os.getenv("PG_PORT", "5432"))
+    PG_USER: str = os.getenv("PG_USER", "postgres")
+    PG_PASSWORD: str = os.getenv("PG_PASSWORD", "")
+    PG_DATABASE: str = os.getenv("PG_DATABASE", "spider_awesome")
+
+    # ========== MySQL 配置 ==========
     MYSQL_HOST: str = os.getenv("MYSQL_HOST", "127.0.0.1")
     MYSQL_PORT: int = int(os.getenv("MYSQL_PORT", "3306"))
     MYSQL_USER: str = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "")
-    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "data_collector")
-
-    # ========== Redis ==========
-    REDIS_HOST: str = os.getenv("REDIS_HOST", "127.0.0.1")
-    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
-    REDIS_PASSWORD: Optional[str] = os.getenv("REDIS_PASSWORD") or None
-    REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
-
-    # ========== 日志 ==========
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    LOG_DIR: str = os.getenv("LOG_DIR", "./logs")
+    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "spider_awesome")
 
     # ========== 代理 ==========
     HTTP_PROXY: Optional[str] = os.getenv("HTTP_PROXY") or None
     HTTPS_PROXY: Optional[str] = os.getenv("HTTPS_PROXY") or None
+
+    # ========== 日志 ==========
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    LOG_DIR: str = os.getenv("LOG_DIR", "var/logs")
 
     # ========== 调度 ==========
     SCHEDULER_ENABLED: bool = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
@@ -77,12 +85,34 @@ class Settings:
 
     # ========== 派生属性 ==========
     @property
-    def MYSQL_URL(self) -> str:
-        """数据库连接 URL"""
-        return (
-            f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
-            f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
-        )
+    def DATABASE_URL(self) -> str:
+        """
+        根据 DB_TYPE 返回对应的数据库连接 URL
+
+        Returns:
+            数据库连接 URL
+        """
+        if self.DB_TYPE == "sqlite":
+            # SQLite 相对路径基于项目根目录
+            db_path = Path(self.SQLITE_PATH)
+            if not db_path.is_absolute():
+                db_path = Path(__file__).parent.parent / db_path
+            return f"sqlite:///{db_path}"
+
+        elif self.DB_TYPE == "postgresql":
+            return (
+                f"postgresql://{self.PG_USER}:{self.PG_PASSWORD}"
+                f"@{self.PG_HOST}:{self.PG_PORT}/{self.PG_DATABASE}"
+            )
+
+        elif self.DB_TYPE == "mysql":
+            return (
+                f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
+                f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+            )
+
+        else:
+            raise ValueError(f"Unsupported DB_TYPE: {self.DB_TYPE}")
 
     @property
     def PROXIES(self) -> Optional[dict]:

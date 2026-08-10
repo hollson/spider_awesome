@@ -1,10 +1,12 @@
 """
 SQLAlchemy 数据库会话管理
+支持 SQLite、PostgreSQL、MySQL
 """
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.settings import settings
@@ -20,23 +22,46 @@ class Database:
         初始化数据库连接
 
         Args:
-            url: 数据库连接 URL，默认使用 settings.MYSQL_URL
+            url: 数据库连接 URL，默认使用 settings.DATABASE_URL
         """
-        self.url = url or settings.MYSQL_URL
-        self.engine = create_engine(
-            self.url,
-            pool_size=10,
-            max_overflow=20,
-            pool_recycle=3600,
-            echo=False,
-        )
+        self.url = url or settings.DATABASE_URL
+        self.db_type = settings.DB_TYPE
+
+        # 根据数据库类型配置不同的参数
+        if self.db_type == "sqlite":
+            # SQLite 需要确保目录存在
+            db_path = Path(self.url.replace("sqlite:///", ""))
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+
+            self.engine = create_engine(
+                self.url,
+                echo=False,
+                connect_args={"check_same_thread": False},
+            )
+            # SQLite 启用外键支持
+            @event.listens_for(self.engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA journal_mode=WAL")
+                cursor.execute("PRAGMA foreign_keys=ON")
+                cursor.close()
+        else:
+            # PostgreSQL 和 MySQL 使用连接池
+            self.engine = create_engine(
+                self.url,
+                pool_size=10,
+                max_overflow=20,
+                pool_recycle=3600,
+                echo=False,
+            )
+
         self.SessionLocal = sessionmaker(bind=self.engine)
 
     def create_tables(self):
         """创建所有表"""
         try:
             Base.metadata.create_all(self.engine)
-            logger.info("数据库表创建成功")
+            logger.info(f"数据库表创建成功 ({self.db_type})")
         except Exception as e:
             logger.error(f"数据库表创建失败: {e}")
             raise
@@ -65,6 +90,6 @@ db = Database()
 
 
 def get_db() -> Generator[Session, None, None]:
-    """FastAPI 依赖注入用的数据库会话生成器"""
+    """获取数据库会话生成器"""
     with db.get_session() as session:
         yield session
