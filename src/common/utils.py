@@ -1,6 +1,6 @@
 """
 通用工具函数
-时间转换、MD5 生成、文件操作等
+统一入口，按需导入各子模块
 """
 
 import hashlib
@@ -8,8 +8,58 @@ import json
 from pathlib import Path
 from typing import Any
 
+# 类型转换
+from src.common.convert_utils import (  # noqa: F401
+    format_price,
+    safe_json,
+    to_bool,
+    to_float,
+    to_int,
+)
+
+# 数据处理
+from src.common.data_utils import (  # noqa: F401
+    chunk_list,
+    deduplicate,
+    filter_none,
+    flatten_dict,
+    merge_dicts,
+    safe_get,
+)
+
+# 文件操作
+from src.common.file_utils import (  # noqa: F401
+    file_hash,
+    load_json,
+    load_jsonl,
+    safe_filename,
+    save_csv,
+    save_json,
+)
 from src.common.html import compress_html  # noqa: F401
+
+# 文本清洗
+from src.common.text_utils import (  # noqa: F401
+    clean_text,
+    extract_between,
+    extract_ints,
+    extract_numbers,
+    remove_html_tags,
+    truncate_text,
+)
 from src.common.time_utils import cost_minutes, parse_datetime  # noqa: F401
+
+# URL 处理
+from src.common.url_utils import (  # noqa: F401
+    decode_url,
+    encode_url,
+    extract_domain,
+    extract_query_params,
+    is_same_domain,
+    is_valid_url,
+    join_url,
+    normalize_url,
+)
 
 
 def generate_id(*fields: Any) -> str:

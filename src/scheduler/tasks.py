@@ -1,12 +1,12 @@
 """
 定时任务函数定义
-支持多任务并行采集
+支持多任务并行采集，按采集器独立调度
 """
 
 from datetime import datetime
 from typing import Any
 
-from src.collector import get_collector, list_collectors
+from src.collector import get_collector, list_enabled_collectors
 from src.common.logger import logger
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
@@ -61,7 +61,7 @@ def run_collector(collector_name: str) -> dict[str, Any]:
 
 def run_all_collectors() -> dict[str, Any]:
     """
-    执行所有采集器任务（串行）
+    执行所有已启用的采集器任务（串行）
 
     Returns:
         任务执行结果
@@ -69,7 +69,7 @@ def run_all_collectors() -> dict[str, Any]:
     logger.info("[Task] 开始执行所有采集任务")
     start_time = datetime.now()
 
-    collectors = list_collectors()
+    collectors = list_enabled_collectors()
     total_result = {"total": 0, "success": 0, "failed": 0}
 
     for name in collectors:
@@ -91,12 +91,12 @@ def run_all_collectors() -> dict[str, Any]:
     return total_result
 
 
-def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[str, Any]:
+def run_parallel_collectors(collector_names: list[str] = None) -> dict[str, Any]:
     """
     并行执行多个采集器任务
 
     Args:
-        collector_names: 要执行的采集器名称列表，None 则执行所有
+        collector_names: 要执行的采集器名称列表，None 则执行所有已启用的
 
     Returns:
         任务执行结果
@@ -106,7 +106,7 @@ def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[st
     from src.settings import settings
 
     if collector_names is None:
-        collector_names = list_collectors()
+        collector_names = list_enabled_collectors()
 
     logger.info(f"[Task] 开始并行采集: {collector_names}")
     start_time = datetime.now()
@@ -132,3 +132,36 @@ def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[st
         f"成功 {total_result['success']}/{total_result['total']})"
     )
     return total_result
+
+
+def parse_cron_to_hour_minute(cron: str) -> tuple[int, int]:
+    """
+    简单解析 cron 表达式，提取小时和分钟
+
+    支持格式：
+    - "0 0 * * *" → (0, 0)
+    - "30 */2 * * *" → (None, 30)  # 每2小时的30分
+    - "0 */6 * * *" → (None, 0)    # 每6小时
+
+    Returns:
+        (hour, minute) 元组，None 表示不固定
+    """
+    parts = cron.strip().split()
+    if len(parts) < 5:
+        return 0, 0
+
+    minute_str, hour_str = parts[0], parts[1]
+
+    # 解析分钟
+    if minute_str.startswith("*/"):
+        minute = 0  # 间隔执行，从0分开始
+    else:
+        minute = int(minute_str)
+
+    # 解析小时
+    if hour_str.startswith("*/"):
+        hour = 0  # 间隔执行，从0时开始
+    else:
+        hour = int(hour_str)
+
+    return hour, minute

@@ -198,9 +198,11 @@ MYSQL_DATABASE=spider_awesome
 
 | 采集器 | 类型 | 文件 | 说明 |
 |--------|------|------|------|
-| `alerion` | POST JSON | `source_alerion.py` | 演示 POST 请求采集 |
-| `asl` | HTML 分页 | `source_asl.py` | 演示 HTML 解析和分页采集 |
-| `noble` | GET JSON | `source_noble.py` | 演示 GET 请求采集 |
+| `alerion` | POST JSON | `source_example_alerion.py` | 示例：演示 POST 请求采集 |
+| `asl` | HTML 分页 | `source_example_asl.py` | 示例：演示 HTML 解析和分页采集 |
+| `noble` | GET JSON | `source_example_noble.py` | 示例：演示 GET 请求采集 |
+
+> 💡 以上为示例采集器，衍生项目可参考或删除
 
 ## ➕ 添加新采集器
 

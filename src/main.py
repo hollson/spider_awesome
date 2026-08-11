@@ -5,7 +5,6 @@
 
 import argparse
 import sys
-import time
 from pathlib import Path
 
 # 确保项目根目录在 Python 路径中
@@ -13,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # 加载环境配置（必须在其他模块导入之前）
 import src.env_loader  # noqa: F401
-from src.collector import get_collector, list_collectors
+from src.collector import get_collector, list_collectors, list_enabled_collectors
 from src.common.logger import logger
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
@@ -21,7 +20,7 @@ from src.settings import settings
 from src.storage.mysql_store import MySQLStorage
 
 
-def cmd_run(args: argparse.Namespace) -> None:
+def cmd_run(args):
     """执行单次采集"""
     collector_name = args.source
     logger.info(f"开始采集: {collector_name}")
@@ -55,7 +54,7 @@ def cmd_run(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
-def cmd_run_all(args: argparse.Namespace) -> None:
+def cmd_run_all(args):
     """执行所有采集器"""
     from src.scheduler.tasks import run_all_collectors
 
@@ -66,7 +65,7 @@ def cmd_run_all(args: argparse.Namespace) -> None:
         logger.info(f"采集完成: 成功 {result['success']}/{result['total']}")
 
 
-def cmd_run_parallel(args: argparse.Namespace) -> None:
+def cmd_run_parallel(args):
     """并行执行采集器"""
     from src.scheduler.tasks import run_parallel_collectors
 
@@ -80,15 +79,16 @@ def cmd_run_parallel(args: argparse.Namespace) -> None:
         logger.info(f"并行采集完成: 成功 {result['success']}/{result['total']}")
 
 
-def cmd_scheduler(args: argparse.Namespace) -> None:
+def cmd_scheduler(args):
     """启动定时调度"""
+    from src.collector import get_collector_schedule
     from src.scheduler.task_manager import task_manager
-    from src.scheduler.tasks import run_all_collectors, run_parallel_collectors
+    from src.scheduler.tasks import parse_cron_to_hour_minute, run_all_collectors, run_parallel_collectors
 
     logger.info("启动定时调度模式")
 
-    # 获取调度配置
-    cron_config = settings.COLLECTOR_CRON
+    # 获取已启用的采集器
+    enabled_collectors = list_enabled_collectors()
     parallel_mode = settings.SCHEDULER_PARALLEL
 
     if parallel_mode:
@@ -97,21 +97,25 @@ def cmd_scheduler(args: argparse.Namespace) -> None:
         task_manager.add_cron_job(
             job_id=task_id,
             func=run_parallel_collectors,
-            hour=settings.COLLECTOR_CRON_HOUR,
-            minute=settings.COLLECTOR_CRON_MINUTE,
+            hour=settings.MAX_WORKERS,  # 使用默认调度时间
+            minute=0,
         )
         logger.info(f"添加并行采集任务: {task_id}")
     else:
         # 串行模式：每个采集器独立调度
-        for collector_name, cron in cron_config.items():
+        for collector_name in enabled_collectors:
+            schedule = get_collector_schedule(collector_name)
+            cron = schedule.get("cron", "0 0 * * *")
+            hour, minute = parse_cron_to_hour_minute(cron)
+
             task_id = f"collect_{collector_name}"
             task_manager.add_cron_job(
                 job_id=task_id,
                 func=lambda name=collector_name: run_all_collectors(),
-                hour=cron.get("hour", 0),
-                minute=cron.get("minute", 0),
+                hour=hour,
+                minute=minute,
             )
-            logger.info(f"添加采集任务: {task_id}")
+            logger.info(f"添加采集任务: {task_id} (cron: {cron})")
 
     # 启动调度器
     task_manager.start()
@@ -121,23 +125,37 @@ def cmd_scheduler(args: argparse.Namespace) -> None:
 
     try:
         while True:
+            import time
+
             time.sleep(1)
     except KeyboardInterrupt:
         task_manager.stop()
         logger.info("调度器已停止")
 
 
-def cmd_list(args: argparse.Namespace) -> None:
+def cmd_list(args):
     """列出所有采集器"""
+    from src.collector import get_collector_config
+
     collectors = list_collectors()
+    enabled = list_enabled_collectors()
+    config = get_collector_config()
+
     print("\n可用的采集器:")
-    print("-" * 40)
+    print("-" * 60)
+    print(f"  {'名称':<15} {'状态':<10} {'调度时间':<20}")
+    print("-" * 60)
+
     for name in collectors:
-        print(f"  - {name}")
+        status = "✅ 启用" if name in enabled else "❌ 禁用"
+        collector_config = config.get("collectors", {}).get(name, {})
+        cron = collector_config.get("cron", "默认")
+        print(f"  {name:<15} {status:<10} {cron:<20}")
+
     print()
 
 
-def cmd_status(args: argparse.Namespace) -> None:
+def cmd_status(args):
     """查看任务状态"""
     from src.scheduler.task_manager import task_manager
 
@@ -156,7 +174,7 @@ def cmd_status(args: argparse.Namespace) -> None:
         )
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(
         description="数据采集模板项目",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -219,5 +237,6 @@ if __name__ == "__main__":
     logger.info(f"环境: {settings.ENV_MODE} | 调试: {settings.DEBUG}")
     logger.info(f"数据库: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else 'SQLite'}")
     logger.info(f"日志级别: {settings.LOG_LEVEL}")
+    logger.info(f"已启用采集器: {', '.join(list_enabled_collectors())}")
     logger.info("=" * 50)
     main()

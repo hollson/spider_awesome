@@ -48,39 +48,14 @@ class Settings:
     LOG_FILE: str = os.getenv("LOG_FILE", "var/logs/spider_awesome.log")
     LOG_RETENTION: int = int(os.getenv("LOG_RETENTION", "7"))
 
-    # ========== 调度 ==========
+    # ========== 调度（全局默认值）==========
+    # 注意：采集器独立调度配置在 configs/collectors.yml 中
     SCHEDULER_ENABLED: bool = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
     SCHEDULER_PARALLEL: bool = os.getenv("SCHEDULER_PARALLEL", "false").lower() == "true"
     MAX_WORKERS: int = int(os.getenv("MAX_WORKERS", "5"))
     TASK_TIMEOUT: int = int(os.getenv("TASK_TIMEOUT", "300"))
     RETRY_COUNT: int = int(os.getenv("RETRY_COUNT", "3"))
     RETRY_DELAY: int = int(os.getenv("RETRY_DELAY", "60"))
-
-    # ========== 采集器调度时间 ==========
-    COLLECTOR_CRON_HOUR: int = int(os.getenv("COLLECTOR_CRON_HOUR", "0"))
-    COLLECTOR_CRON_MINUTE: int = int(os.getenv("COLLECTOR_CRON_MINUTE", "0"))
-
-    @property
-    def COLLECTOR_CRON(self) -> dict[str, dict]:  # noqa: N802
-        """
-        获取采集器调度配置
-
-        从环境变量读取，格式:
-        COLLECTOR_CRON_{NAME}_HOUR=0
-        COLLECTOR_CRON_{NAME}_MINUTE=30
-
-        Returns:
-            采集器调度配置字典
-        """
-        from src.collector import list_collectors
-
-        cron_config = {}
-        for name in list_collectors():
-            hour = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_HOUR", str(self.COLLECTOR_CRON_HOUR)))
-            minute = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_MINUTE", str(self.COLLECTOR_CRON_MINUTE)))
-            cron_config[name] = {"hour": hour, "minute": minute}
-
-        return cron_config
 
     @property
     def PROXIES(self) -> dict | None:  # noqa: N802
