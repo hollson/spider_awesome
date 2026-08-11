@@ -3,7 +3,7 @@
 使用 Pydantic 进行数据结构校验
 """
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
@@ -16,32 +16,32 @@ class DataRecordSchema(BaseModel):
     id: str = Field(..., description="数据唯一标识")
     source: str = Field(..., description="数据来源")
     collector_name: str = Field(..., description="采集器名称")
-    operator_id: Optional[str] = None
+    operator_id: str | None = None
 
-    title: Optional[str] = None
-    tail_num: Optional[str] = None
-    model: Optional[str] = None
+    title: str | None = None
+    tail_num: str | None = None
+    model: str | None = None
 
-    origin_code: Optional[str] = None
-    origin_city: Optional[str] = None
-    dest_code: Optional[str] = None
-    dest_city: Optional[str] = None
+    origin_code: str | None = None
+    origin_city: str | None = None
+    dest_code: str | None = None
+    dest_city: str | None = None
 
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    take_off_time: Optional[datetime] = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    take_off_time: datetime | None = None
 
-    cost_minutes: Optional[int] = None
-    flight_cost: Optional[float] = None
-    currency: Optional[str] = None
-    currency_symbol: Optional[str] = None
+    cost_minutes: int | None = None
+    flight_cost: float | None = None
+    currency: str | None = None
+    currency_symbol: str | None = None
 
-    seats: Optional[int] = None
-    thumb: Optional[str] = None
-    preview: Optional[list] = None
-    source_url: Optional[str] = None
+    seats: int | None = None
+    thumb: str | None = None
+    preview: list | None = None
+    source_url: str | None = None
 
-    raw_data: Optional[dict] = None
+    raw_data: dict | None = None
 
     @validator("seats", pre=True)
     def parse_seats(cls, v):
@@ -71,7 +71,7 @@ class Validator(BaseProcessor):
     - 将不合格数据记录到日志
     """
 
-    def process(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         执行数据校验
 

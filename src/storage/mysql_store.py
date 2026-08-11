@@ -2,15 +2,14 @@
 MySQL 存储实现
 使用 SQLAlchemy 进行数据持久化
 """
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from sqlalchemy import func
 
 from src.common.logger import logger
-from src.storage.models import Base, DataRecord
-from src.storage.session import db
 from src.storage.base_storage import BaseStorage
+from src.storage.models import DataRecord
+from src.storage.session import db
 
 
 class MySQLStorage(BaseStorage):
@@ -33,7 +32,7 @@ class MySQLStorage(BaseStorage):
         if auto_create:
             db.create_tables()
 
-    def save(self, records: List[Dict[str, Any]]) -> int:
+    def save(self, records: list[dict[str, Any]]) -> int:
         """
         保存数据到 MySQL
 
@@ -105,7 +104,7 @@ class MySQLStorage(BaseStorage):
         with db.get_session() as session:
             return session.query(DataRecord).filter_by(id=record_id).count() > 0
 
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         """统计数据数量"""
         with db.get_session() as session:
             query = session.query(func.count(DataRecord.id))
@@ -118,12 +117,12 @@ class MySQLStorage(BaseStorage):
 
     def query(
         self,
-        source: Optional[str] = None,
-        origin_code: Optional[str] = None,
-        dest_code: Optional[str] = None,
+        source: str | None = None,
+        origin_code: str | None = None,
+        dest_code: str | None = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         查询数据
 

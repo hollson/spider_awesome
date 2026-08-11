@@ -66,16 +66,30 @@ endef
 
 # 基础清理函数
 define clean_handler
-	@echo "📂 清理 Python 缓存文件..."
-	@rm -rf __pycache__ .pytest_cache .coverage output/
-	@find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true
-	@find . -type d -name "__pycache__" -delete 2>/dev/null || true
-	@echo "💾 清理日志和临时文件..."
-	@rm -rf logs/ tmp/ temp/
-	@find . -type f \( -name "*.log" -o -name "*.tmp" -o -name "*.swp" -o -name "*~" \) -delete 2>/dev/null || true
-	@echo "📦 清理构建产物..."
-	@rm -rf dist/ build/ .eggs/ *.egg-info/
-	@echo "✅ 清理完成"
+	@echo ""
+	@echo "📂 将清理以下内容："
+	@echo "   - Python 字节码（*.pyc, *.pyo, __pycache__）"
+	@echo "   - 测试产物（.pytest_cache, .coverage, var/pytest_cache, var/coverage, var/output）"
+	@echo "   - 工具缓存（.ruff_cache）"
+	@echo "   - 构建产物（dist/, build/, *.egg-info/）"
+	@echo ""
+	@echo "⚠️  保留：数据库(var/database)、原始缓存(var/raw)、日志(var/logs)"
+	@echo ""
+	@read -p "确认清理？[y/N] " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		echo "📂 清理 Python 字节码..."; \
+		find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete 2>/dev/null || true; \
+		find . -type d -name "__pycache__" -delete 2>/dev/null || true; \
+		echo "💾 清理测试产物..."; \
+		rm -rf .pytest_cache .coverage var/pytest_cache var/coverage var/output; \
+		echo "🔧 清理工具缓存..."; \
+		rm -rf .ruff_cache; \
+		echo "📦 清理构建产物..."; \
+		rm -rf dist/ build/ .eggs/ *.egg-info/; \
+		echo "✅ 清理完成"; \
+	else \
+		echo "⏭️  已跳过清理"; \
+	fi
 endef
 
 # ======================================================================================================
@@ -144,9 +158,9 @@ scheduler:
 .PHONY: test
 test:
 	@echo "🧪 运行测试..."
-	@mkdir -p output
-	@uv run pytest tests/ -v --cov=src --cov-report=html:output/htmlcov
-	@echo "✅ 测试完成，报告位于 output/htmlcov/"
+	@mkdir -p var/coverage/data var/coverage/report
+	@ENV_MODE=test COVERAGE_FILE=var/coverage/data/.coverage uv run pytest tests/ -v --cov=src --cov-report=html:var/coverage/report/htmlcov --cov-report=xml:var/coverage/report/coverage.xml --cov-report=term-missing
+	@echo "✅ 测试完成，报告位于 var/coverage/report/htmlcov/"
 
 
 #HELP status@任务状态

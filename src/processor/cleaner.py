@@ -2,7 +2,7 @@
 数据清洗模块
 去重、空值处理、脏数据过滤
 """
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from src.common.logger import logger
 from src.processor.base_processor import BaseProcessor
@@ -18,7 +18,7 @@ class Cleaner(BaseProcessor):
     - 去除无效字符
     """
 
-    def __init__(self, required_fields: Optional[List[str]] = None):
+    def __init__(self, required_fields: list[str] | None = None):
         """
         初始化清洗器
 
@@ -27,7 +27,7 @@ class Cleaner(BaseProcessor):
         """
         self.required_fields = required_fields or ["source"]
 
-    def process(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         执行数据清洗
 
@@ -55,7 +55,7 @@ class Cleaner(BaseProcessor):
         logger.info(f"[Cleaner] 清洗完成，保留 {len(records)} 条数据 (过滤 {initial_count - len(records)} 条)")
         return records
 
-    def _deduplicate(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _deduplicate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """去重（基于 ID）"""
         seen_ids = set()
         unique_records = []
@@ -70,7 +70,7 @@ class Cleaner(BaseProcessor):
 
         return unique_records
 
-    def _filter_empty(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _filter_empty(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """过滤空值记录"""
         filtered = []
         for record in records:
@@ -80,7 +80,7 @@ class Cleaner(BaseProcessor):
                 logger.debug(f"过滤空值记录: {record.get('id')}")
         return filtered
 
-    def _clean_strings(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _clean_strings(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """清理字符串字段"""
         for record in records:
             for key, value in record.items():

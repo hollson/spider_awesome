@@ -3,16 +3,16 @@
 支持多任务并行采集
 """
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from src.collector import get_collector, list_collectors
+from src.common.logger import logger
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
 from src.storage.mysql_store import MySQLStorage
-from src.common.logger import logger
 
 
-def run_collector(collector_name: str) -> Dict[str, Any]:
+def run_collector(collector_name: str) -> dict[str, Any]:
     """
     执行单个采集器任务
 
@@ -59,7 +59,7 @@ def run_collector(collector_name: str) -> Dict[str, Any]:
         raise
 
 
-def run_all_collectors() -> Dict[str, Any]:
+def run_all_collectors() -> dict[str, Any]:
     """
     执行所有采集器任务（串行）
 
@@ -91,7 +91,7 @@ def run_all_collectors() -> Dict[str, Any]:
     return total_result
 
 
-def run_parallel_collectors(collector_names: List[str] = None) -> Dict[str, Any]:
+def run_parallel_collectors(collector_names: list[str] = None) -> dict[str, Any]:
     """
     并行执行多个采集器任务
 
@@ -102,6 +102,7 @@ def run_parallel_collectors(collector_names: List[str] = None) -> Dict[str, Any]
         任务执行结果
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
     from src.settings import settings
 
     if collector_names is None:

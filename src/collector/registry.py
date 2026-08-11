@@ -2,16 +2,14 @@
 采集器注册表
 统一管理所有可用的采集器
 """
-from typing import Dict, List, Type
 
 from src.collector.base_collector import BaseCollector
 from src.collector.source_alerion import AlerionCollector
 from src.collector.source_asl import ASLCollector
 from src.collector.source_noble import NobleCollector
 
-
 # 采集器注册表
-COLLECTORS: Dict[str, Type[BaseCollector]] = {
+COLLECTORS: dict[str, type[BaseCollector]] = {
     "alerion": AlerionCollector,
     "asl": ASLCollector,
     "noble": NobleCollector,
@@ -38,11 +36,11 @@ def get_collector(name: str) -> BaseCollector:
     return collector_cls()
 
 
-def list_collectors() -> List[str]:
+def list_collectors() -> list[str]:
     """列出所有可用的采集器名称"""
     return list(COLLECTORS.keys())
 
 
-def get_all_collectors() -> List[BaseCollector]:
+def get_all_collectors() -> list[BaseCollector]:
     """获取所有采集器实例"""
     return [cls() for cls in COLLECTORS.values()]

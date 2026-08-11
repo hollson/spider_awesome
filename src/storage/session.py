@@ -2,20 +2,31 @@
 SQLAlchemy 数据库会话管理
 支持 SQLite、PostgreSQL、MySQL
 """
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.settings import settings
 from src.common.logger import logger
+from src.settings import settings
 from src.storage.models import Base
 
 
 class Database:
     """数据库连接管理"""
+
+    @staticmethod
+    def _detect_db_type(url: str) -> str:
+        """从连接串推断数据库类型"""
+        if url.startswith("sqlite"):
+            return "sqlite"
+        elif url.startswith("postgresql"):
+            return "postgresql"
+        elif url.startswith("mysql"):
+            return "mysql"
+        return "unknown"
 
     def __init__(self, url: str = None):
         """
@@ -25,7 +36,7 @@ class Database:
             url: 数据库连接 URL，默认使用 settings.DATABASE_URL
         """
         self.url = url or settings.DATABASE_URL
-        self.db_type = settings.DB_TYPE
+        self.db_type = self._detect_db_type(self.url)
 
         # 根据数据库类型配置不同的参数
         if self.db_type == "sqlite":

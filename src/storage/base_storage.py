@@ -3,7 +3,7 @@
 定义数据持久化存储的统一接口
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BaseStorage(ABC):
@@ -14,7 +14,7 @@ class BaseStorage(ABC):
     """
 
     @abstractmethod
-    def save(self, records: List[Dict[str, Any]]) -> int:
+    def save(self, records: list[dict[str, Any]]) -> int:
         """
         保存数据
 
@@ -40,7 +40,7 @@ class BaseStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def count(self, filters: Optional[Dict[str, Any]] = None) -> int:
+    def count(self, filters: dict[str, Any] | None = None) -> int:
         """
         统计数据数量
 
@@ -52,7 +52,7 @@ class BaseStorage(ABC):
         """
         raise NotImplementedError
 
-    def save_one(self, record: Dict[str, Any]) -> bool:
+    def save_one(self, record: dict[str, Any]) -> bool:
         """
         保存单条数据
 

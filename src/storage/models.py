@@ -5,16 +5,15 @@ SQLAlchemy ORM 数据模型
 from datetime import datetime
 
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     Float,
+    Index,
     Integer,
     SmallInteger,
     String,
     Text,
-    JSON,
-    Boolean,
-    Index,
 )
 from sqlalchemy.orm import declarative_base
 

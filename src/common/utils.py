@@ -4,11 +4,9 @@
 """
 import hashlib
 import json
-import os
 import re
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Optional, Union
 
 # 日期格式模板
 DATE_FORMATS = [
@@ -55,9 +53,9 @@ def generate_id(*fields) -> str:
 
 
 def parse_datetime(
-    value: Union[str, int, float, datetime, date],
-    fmt: Optional[str] = None,
-) -> Optional[datetime]:
+    value: str | int | float | datetime | date,
+    fmt: str | None = None,
+) -> datetime | None:
     """
     智能解析日期时间
 
@@ -105,7 +103,7 @@ def parse_datetime(
     return None
 
 
-def cost_minutes(time_str: str) -> Optional[int]:
+def cost_minutes(time_str: str) -> int | None:
     """
     将时间差字符串转换为分钟
 
@@ -152,7 +150,7 @@ def cost_minutes(time_str: str) -> Optional[int]:
     return None
 
 
-def ensure_dir(path: Union[str, Path]) -> Path:
+def ensure_dir(path: str | Path) -> Path:
     """
     确保目录存在
 
@@ -167,7 +165,7 @@ def ensure_dir(path: Union[str, Path]) -> Path:
     return p
 
 
-def read_file(path: Union[str, Path], encoding: str = "utf-8") -> str:
+def read_file(path: str | Path, encoding: str = "utf-8") -> str:
     """
     读取文件内容
 
@@ -178,12 +176,12 @@ def read_file(path: Union[str, Path], encoding: str = "utf-8") -> str:
     Returns:
         文件内容
     """
-    with open(path, "r", encoding=encoding) as f:
+    with open(path, encoding=encoding) as f:
         return f.read()
 
 
 def write_file(
-    path: Union[str, Path],
+    path: str | Path,
     content: str,
     encoding: str = "utf-8",
 ) -> None:

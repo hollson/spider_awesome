@@ -2,11 +2,10 @@
 示例采集器2: ASL
 演示 HTML 分页采集方式
 """
-import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from bs4 import BeautifulSoup
 
@@ -42,7 +41,7 @@ class ASLCollector(BaseCollector):
     def name(self) -> str:
         return "ASL"
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         """
         执行采集（支持分页）
 
@@ -80,7 +79,7 @@ class ASLCollector(BaseCollector):
         logger.info(f"[{self.name}] 采集完成，共 {len(all_records)} 条数据")
         return all_records
 
-    def _fetch_page(self, url: str) -> Tuple[List[Dict[str, Any]], List[str]]:
+    def _fetch_page(self, url: str) -> tuple[list[dict[str, Any]], list[str]]:
         """
         采集单页数据
 
@@ -107,7 +106,7 @@ class ASLCollector(BaseCollector):
         match = re.search(r"page=(\d+)", url)
         return int(match.group(1)) if match else 1
 
-    def _parse_html(self, html: str) -> Tuple[List[Dict[str, Any]], List[str]]:
+    def _parse_html(self, html: str) -> tuple[list[dict[str, Any]], list[str]]:
         """
         解析 HTML
 
@@ -141,7 +140,7 @@ class ASLCollector(BaseCollector):
 
         return records, next_pages
 
-    def _parse_article(self, article) -> Optional[Dict[str, Any]]:
+    def _parse_article(self, article) -> dict[str, Any] | None:
         """解析单篇文章（航班数据）"""
         # 提取标题
         title_elem = article.find("span", class_="plane-name")
@@ -206,7 +205,7 @@ class ASLCollector(BaseCollector):
             "raw_data": {"route": route_text},
         }
 
-    def _parse_route(self, route: str) -> Tuple[str, str, str, str]:
+    def _parse_route(self, route: str) -> tuple[str, str, str, str]:
         """
         解析航线文本
 
@@ -223,7 +222,7 @@ class ASLCollector(BaseCollector):
 
 
 # 便捷函数
-def collect() -> List[Dict[str, Any]]:
+def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
     with ASLCollector() as collector:
         return collector.fetch()

@@ -3,14 +3,14 @@
 支持重试、代理、超时、指数退避
 """
 import time
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from src.settings import settings
 from src.common.logger import logger
+from src.settings import settings
 
 
 class HttpClient:
@@ -21,7 +21,7 @@ class HttpClient:
         timeout: int = 30,
         retries: int = 3,
         backoff_factor: float = 1.0,
-        proxies: Optional[dict] = None,
+        proxies: dict | None = None,
     ):
         """
         初始化 HTTP 客户端
@@ -63,11 +63,11 @@ class HttpClient:
         self,
         method: str,
         url: str,
-        headers: Optional[Dict[str, str]] = None,
-        json: Optional[Any] = None,
-        data: Optional[Union[str, bytes, dict]] = None,
-        params: Optional[Dict[str, str]] = None,
-        timeout: Optional[int] = None,
+        headers: dict[str, str] | None = None,
+        json: Any | None = None,
+        data: str | bytes | dict | None = None,
+        params: dict[str, str] | None = None,
+        timeout: int | None = None,
         **kwargs,
     ) -> requests.Response:
         """

@@ -3,7 +3,7 @@
 通过 sleep 模拟耗时的网络请求
 """
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
@@ -18,7 +18,7 @@ class ExampleSlowCollector(BaseCollector):
     def name(self) -> str:
         return "example_slow"
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         logger.info(f"[{self.name}] 开始采集，模拟 {self.SLEEP_SECONDS}s 延迟...")
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")
@@ -37,7 +37,7 @@ class ExampleMediumCollector(BaseCollector):
     def name(self) -> str:
         return "example_medium"
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         logger.info(f"[{self.name}] 开始采集，模拟 {self.SLEEP_SECONDS}s 延迟...")
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")
@@ -55,7 +55,7 @@ class ExampleFastCollector(BaseCollector):
     def name(self) -> str:
         return "example_fast"
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         logger.info(f"[{self.name}] 开始采集，模拟 {self.SLEEP_SECONDS}s 延迟...")
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")

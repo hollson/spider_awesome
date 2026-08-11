@@ -4,7 +4,7 @@
 """
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
@@ -33,7 +33,7 @@ class NobleCollector(BaseCollector):
         response = self.http_client.get(url=self.API_URL, headers=self.HEADERS)
         return response.text
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         content = self.fetch_with_cache(
             cache_filename="Noble_raw.json",
             fetch_func=self._make_request,
@@ -54,7 +54,7 @@ class NobleCollector(BaseCollector):
         logger.info(f"[{self.name}] Fetched {len(records)} records")
         return records
 
-    def _parse_flight(self, flight: dict) -> Optional[Dict[str, Any]]:
+    def _parse_flight(self, flight: dict) -> dict[str, Any] | None:
         airport_from = flight.get("airport_from", {})
         airport_to = flight.get("airport_to", {})
 
@@ -131,7 +131,7 @@ class NobleCollector(BaseCollector):
         return ", ".join(parts)
 
 
-def collect() -> List[Dict[str, Any]]:
+def collect() -> list[dict[str, Any]]:
     with NobleCollector() as collector:
         return collector.fetch()
 

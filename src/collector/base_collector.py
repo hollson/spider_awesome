@@ -2,10 +2,9 @@
 采集器抽象基类
 定义所有采集器必须实现的统一接口
 """
-import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from src.common.http_client import HttpClient
 from src.common.logger import logger
@@ -22,7 +21,7 @@ class BaseCollector(ABC):
     """
 
     def __init__(self):
-        self._http_client: Optional[HttpClient] = None
+        self._http_client: HttpClient | None = None
 
     @property
     def name(self) -> str:
@@ -37,7 +36,7 @@ class BaseCollector(ABC):
         return self._http_client
 
     @abstractmethod
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         """
         执行采集
 
@@ -86,7 +85,7 @@ class BaseCollector(ABC):
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / filename
 
-    def read_cache(self, filename: str) -> Optional[str]:
+    def read_cache(self, filename: str) -> str | None:
         """
         读取缓存文件
 

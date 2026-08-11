@@ -65,6 +65,9 @@ Desktop.ini
 .coverage
 htmlcov/
 
+# 工具缓存
+.ruff_cache/
+
 # 打包
 *.whl
 *.tar.gz

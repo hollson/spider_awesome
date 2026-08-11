@@ -3,7 +3,6 @@ HTML 处理工具模块
 提供 HTML 压缩、DOM 提取等通用功能
 """
 import re
-from typing import Optional
 
 
 def compress_html(html: str) -> str:

@@ -3,8 +3,7 @@
 演示 POST JSON API 采集方式
 """
 import json
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from dateutil import parser as date_parser
 
@@ -55,7 +54,7 @@ class AlerionCollector(BaseCollector):
         )
         return response.text
 
-    def fetch(self) -> List[Dict[str, Any]]:
+    def fetch(self) -> list[dict[str, Any]]:
         """
         执行采集
 
@@ -86,7 +85,7 @@ class AlerionCollector(BaseCollector):
         logger.info(f"[{self.name}] 采集完成，共 {len(records)} 条数据")
         return records
 
-    def _parse_flight(self, flight: dict) -> Optional[Dict[str, Any]]:
+    def _parse_flight(self, flight: dict) -> dict[str, Any] | None:
         """解析单条航班数据"""
         ac = flight.get("ac", {})
         airport_from = flight.get("airportFrom", {})
@@ -142,7 +141,7 @@ class AlerionCollector(BaseCollector):
 
 
 # 便捷函数
-def collect() -> List[Dict[str, Any]]:
+def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
     with AlerionCollector() as collector:
         return collector.fetch()

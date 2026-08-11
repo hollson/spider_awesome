@@ -3,10 +3,10 @@
 使用 APScheduler 实现定时采集任务，支持并发控制、失败重试、状态管理
 """
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum
-from typing import Callable, Dict, List, Optional
 from threading import Lock
 
 from src.common.logger import logger
@@ -27,8 +27,8 @@ class TaskRecord:
     def __init__(self, task_id: str):
         self.task_id = task_id
         self.status = TaskStatus.PENDING
-        self.start_time: Optional[datetime] = None
-        self.end_time: Optional[datetime] = None
+        self.start_time: datetime | None = None
+        self.end_time: datetime | None = None
         self.duration: float = 0
         self.total_count: int = 0
         self.success_count: int = 0
@@ -85,9 +85,9 @@ class TaskManager:
         self.retry_delay = retry_delay
 
         self._scheduler = None
-        self._executor: Optional[ThreadPoolExecutor] = None
-        self._tasks: Dict[str, dict] = {}
-        self._records: Dict[str, TaskRecord] = {}
+        self._executor: ThreadPoolExecutor | None = None
+        self._tasks: dict[str, dict] = {}
+        self._records: dict[str, TaskRecord] = {}
         self._lock = Lock()
 
     def _get_scheduler(self):
@@ -271,12 +271,12 @@ class TaskManager:
             self._executor.shutdown(wait=True)
             self._executor = None
 
-    def get_task_status(self, task_id: str) -> Optional[dict]:
+    def get_task_status(self, task_id: str) -> dict | None:
         """获取任务状态"""
         record = self._records.get(task_id)
         return record.to_dict() if record else None
 
-    def get_all_status(self) -> List[dict]:
+    def get_all_status(self) -> list[dict]:
         """获取所有任务状态"""
         return [record.to_dict() for record in self._records.values()]
 

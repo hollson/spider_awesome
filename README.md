@@ -92,7 +92,14 @@ $ spider-awesome/
 │   └── main.py                #  主入口
 ├── configs/                   #  环境配置
 ├── tests/                     #  测试
-├── var/                       #  运行时数据（database/raw/logs/cache/tmp）
+├── var/                       #  运行时数据（全部 gitignore）
+│   ├── database/              #  数据库文件
+│   ├── raw/                   #  采集器原始缓存
+│   ├── logs/                  #  日志文件
+│   ├── output/                #  测试覆盖率报告
+│   ├── coverage/              #  覆盖率数据
+│   ├── pytest_cache/          #  pytest 缓存
+│   └── cache/                 #  其他工具缓存
 ├── Makefile
 ├── pyproject.toml
 └── README.md

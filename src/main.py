@@ -11,13 +11,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # 加载环境配置（必须在其他模块导入之前）
 import src.env_loader  # noqa: F401
-
+from src.collector import get_collector, list_collectors
 from src.common.logger import logger
-from src.collector import list_collectors, get_collector
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
-from src.storage.mysql_store import MySQLStorage
 from src.settings import settings
+from src.storage.mysql_store import MySQLStorage
 
 
 def cmd_run(args):

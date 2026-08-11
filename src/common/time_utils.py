@@ -4,8 +4,6 @@
 """
 import re
 from datetime import date, datetime
-from typing import Optional, Union
-
 
 # 月份映射
 MONTH_MAP = {
@@ -53,9 +51,9 @@ DATETIME_FORMATS = [
 
 
 def parse_datetime(
-    value: Union[str, int, float, datetime, date],
-    fmt: Optional[str] = None,
-) -> Optional[datetime]:
+    value: str | int | float | datetime | date,
+    fmt: str | None = None,
+) -> datetime | None:
     """
     智能解析日期时间
 
@@ -102,7 +100,7 @@ def parse_datetime(
     return None
 
 
-def cost_minutes(time_str: str) -> Optional[int]:
+def cost_minutes(time_str: str) -> int | None:
     """
     将时间差字符串转换为分钟
 
@@ -165,7 +163,7 @@ def format_datetime(dt: datetime, fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
     return dt.strftime(fmt)
 
 
-def convert_around(month_day: str) -> Optional[str]:
+def convert_around(month_day: str) -> str | None:
     """
     将 "December 31" 格式的日期补充年份
 

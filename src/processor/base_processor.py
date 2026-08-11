@@ -3,7 +3,7 @@
 定义数据清洗、转换、校验的统一接口
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BaseProcessor(ABC):
@@ -14,7 +14,7 @@ class BaseProcessor(ABC):
     """
 
     @abstractmethod
-    def process(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         处理数据
 
