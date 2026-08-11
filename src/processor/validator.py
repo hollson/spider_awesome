@@ -107,7 +107,6 @@ class Validator(BaseProcessor):
             logger.warning(f"[Validator] {len(invalid_records)} 条数据校验失败")
 
         logger.info(
-            f"[Validator] 校验完成: {len(valid_records)} 通过, "
-            f"{len(invalid_records)} 失败 (共 {initial_count} 条)"
+            f"[Validator] 校验完成: {len(valid_records)} 通过, {len(invalid_records)} 失败 (共 {initial_count} 条)"
         )
         return valid_records

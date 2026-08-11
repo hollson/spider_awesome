@@ -113,7 +113,7 @@ init:
 format:
 	$(call install_tool,ruff)
 	@echo "📝 格式化代码..."
-	@uv tool run ruff format . --target-version py310
+	@uv tool run ruff format .
 	@echo "✅ 格式化完成"
 
 
@@ -131,7 +131,7 @@ lint:
 bandit:
 	$(call install_tool,bandit)
 	@echo "🔒 安全漏洞扫描..."
-	@uv tool run bandit -r src/ -f screen
+	@uv tool run bandit -r src/ -s B101 -f screen
 	@echo "✅ 安全扫描完成"
 
 

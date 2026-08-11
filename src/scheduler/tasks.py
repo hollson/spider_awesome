@@ -49,8 +49,7 @@ def run_collector(collector_name: str) -> dict[str, Any]:
 
         elapsed = (datetime.now() - start_time).total_seconds()
         logger.info(
-            f"[Task] 采集完成: {collector_name} "
-            f"(采集 {result['total']} 条, 保存 {saved} 条, 耗时 {elapsed:.1f}s)"
+            f"[Task] 采集完成: {collector_name} (采集 {result['total']} 条, 保存 {saved} 条, 耗时 {elapsed:.1f}s)"
         )
         return result
 

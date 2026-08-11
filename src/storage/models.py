@@ -76,9 +76,7 @@ class DataRecord(Base):
 
     # 时间戳
     create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    update_time = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间"
-    )
+    update_time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
 
     # 索引
     __table_args__ = (

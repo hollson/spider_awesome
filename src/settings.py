@@ -75,12 +75,8 @@ class Settings:
 
         cron_config = {}
         for name in list_collectors():
-            hour = int(
-                os.getenv(f"COLLECTOR_CRON_{name.upper()}_HOUR", str(self.COLLECTOR_CRON_HOUR))
-            )
-            minute = int(
-                os.getenv(f"COLLECTOR_CRON_{name.upper()}_MINUTE", str(self.COLLECTOR_CRON_MINUTE))
-            )
+            hour = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_HOUR", str(self.COLLECTOR_CRON_HOUR)))
+            minute = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_MINUTE", str(self.COLLECTOR_CRON_MINUTE)))
             cron_config[name] = {"hour": hour, "minute": minute}
 
         return cron_config

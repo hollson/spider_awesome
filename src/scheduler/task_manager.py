@@ -107,9 +107,7 @@ class TaskManager:
     def _get_executor(self) -> ThreadPoolExecutor:
         """获取线程池执行器"""
         if self._executor is None:
-            self._executor = ThreadPoolExecutor(
-                max_workers=self.max_workers, thread_name_prefix="collector"
-            )
+            self._executor = ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="collector")
         return self._executor
 
     def add_cron_job(
@@ -238,9 +236,7 @@ class TaskManager:
                     record.status = TaskStatus.FAILED
                     record.end_time = datetime.now()
                     record.duration = (record.end_time - record.start_time).total_seconds()
-                    logger.error(
-                        f"[Scheduler] 任务 {task_id} 最终失败 (已重试 {self.retry_count} 次)"
-                    )
+                    logger.error(f"[Scheduler] 任务 {task_id} 最终失败 (已重试 {self.retry_count} 次)")
 
     def submit_task(self, task_id: str, func: Callable) -> str:
         """

@@ -30,9 +30,7 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logger(
-    name: str = "data_collector", level: str = None, log_dir: str = None
-) -> logging.Logger:
+def setup_logger(name: str = "data_collector", level: str = None, log_dir: str = None) -> logging.Logger:
     """
     配置并返回日志记录器
 

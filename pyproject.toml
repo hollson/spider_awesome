@@ -1,33 +1,50 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 项目基本信息（PEP 621）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [project]
 name = "spider_awesome"
 version = "1.0.0"
 description = "通用数据采集模板项目"
-requires-python = ">=3.12"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"}
-]
+authors = [{ name = "Your Name", email = "your.email@example.com" }]
 readme = "README.md"
+requires-python = ">=3.12"
 
 dependencies = [
-    "requests>=2.34.2",
-    "beautifulsoup4>=4.15.0",
-    "pydantic>=2.13.4",
-    "python-dotenv>=1.2.2",
-    "sqlalchemy>=2.0.50",
-    "pymysql>=1.2.0",
-    "psycopg2-binary>=2.9.12",
-    "python-dateutil>=2.9.0",
-    "apscheduler>=3.11.2",
-    "loguru>=0.7.2",
+  "requests>=2.34.2",             # HTTP 请求库
+  "beautifulsoup4>=4.15.0",       # HTML 解析
+  "pydantic>=2.13.4",             # 数据校验
+  "python-dotenv>=1.2.2",         # 环境变量加载
+  "sqlalchemy>=2.0.50",           # 数据库 ORM
+  "pymysql>=1.2.0",               # MySQL 适配器
+  "psycopg2-binary>=2.9.12",      # PostgreSQL 适配器
+  "python-dateutil>=2.9.0",       # 日期时间解析
+  "apscheduler>=3.11.2",          # 定时调度
+  "loguru>=0.7.2",                # 增强型日志
 ]
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 开发依赖
+# 格式： uv add --optional dev <包名>
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [project.optional-dependencies]
 dev = [
-    "pytest>=9.1.0",
-    "pytest-cov>=7.1.0",
-    "ruff>=0.16.2",
+  "ruff>=0.16.2",             # 代码检查和格式化
+  "basedpyright>=1.39.8",     # 静态类型检查
+  "bandit>=1.9.3",            # 代码安全扫描
 ]
 
+# 测试依赖（继承 dev）
+# 格式： uv add --optional test <包名>
+test = [
+  "spider_awesome[dev]",      # 继承开发依赖
+  "pytest>=9.1.0",            # 测试框架
+  "pytest-cov>=7.1.0",        # 测试覆盖率
+  "coverage>=7.15.0",         # 覆盖率核心库
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 构建系统
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -35,6 +52,79 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# uv 工具配置
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[tool.uv]
+package = false
+constraint-dependencies = ["annotated-types>=0.7.0"]
+override-dependencies = ["annotated-types>=0.7.0"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 代码检查（Ruff）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle 错误
+  "F",  # pyflakes 检查
+  "W",  # pycodestyle 警告
+  "I",  # isort 导入排序
+  "N",  # pep8-naming 命名规范
+  "UP", # pyupgrade 语法升级
+  "B",  # flake8-bugbear 潜在错误
+  "C",  # flake8-comprehensions 列表推导式
+]
+ignore = [
+  "E501",  # 行长度由 formatter 处理
+  "C901",  # 函数复杂度（暂不检查）
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # 允许未使用的导入（用于导出）
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 静态类型检查（Basedpyright）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+include = ["src"]
+exclude = [
+  "venv",
+  ".venv",
+  "build",
+  "dist",
+  "*.egg-info",
+  ".pytest_cache",
+  "var",
+  "tests",
+]
+reportMissingTypeStubs = false
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 安全扫描（Bandit）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[tool.bandit]
+skips = ["B101"]  # 跳过 assert 检查
+targets = ["src"]
+exclude = [
+  "tests",
+  "venv",
+  ".venv",
+  "build",
+  "dist",
+  "*.egg-info",
+  ".pytest_cache",
+  "var",
+]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 测试配置（Pytest）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
@@ -43,6 +133,9 @@ python_functions = ["test_*"]
 addopts = "-v --tb=short"
 cache_dir = "var/pytest_cache"
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 覆盖率（Coverage.py）
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [tool.coverage.run]
 source = ["src"]
 omit = ["tests/*"]
@@ -50,16 +143,8 @@ omit = ["tests/*"]
 [tool.coverage.report]
 show_missing = true
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if __name__ == .__main__.",
-    "raise NotImplementedError",
+  "pragma: no cover",
+  "def __repr__",
+  "if __name__ == .__main__.",
+  "raise NotImplementedError",
 ]
-
-[tool.ruff]
-target-version = "py312"
-line-length = 100
-
-[tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "B"]
-ignore = ["E501"]
