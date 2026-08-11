@@ -17,6 +17,7 @@ define check_wsl_linux_mac
 	fi
 endef
 
+
 # UV安装函数
 define install_uv
 	@bash -c ' \
@@ -52,6 +53,7 @@ define install_uv
 		fi'
 endef
 
+
 # 检查并安装全局工具
 define install_tool
 	@if ! uv tool list | grep -q "$1"; then \
@@ -60,6 +62,7 @@ define install_tool
 		echo "✅ $1 installed"; \
 	fi
 endef
+
 
 # 基础清理函数
 define clean_handler
@@ -77,17 +80,7 @@ endef
 
 # ======================================================================================================
 
-#HELP help@查看帮助
-.PHONY: help
-help: Makefile
-	@echo "Usage:  make [command] [options]"
-	@echo
-	@echo "Available Commands:"
-	@sed -n "s/^#HELP//p" $(firstword $(MAKEFILE_LIST)) | awk -F'@' '{ printf "  \033[1;31m%-16s\033[0m%s\n", $$1, $$2 }'
-	@echo
-
-
-#HELP init@初始化环境
+#HELP init@初始化
 .PHONY: init
 init:
 	@echo "🌌 初始化环境..."
@@ -101,13 +94,7 @@ init:
 	@echo "✅ 环境初始化完成"
 
 
-#HELP clean@清理项目
-.PHONY: clean
-clean:
-	$(call clean_handler)
-
-
-#HELP format@格式化代码
+#HELP format@格式化
 .PHONY: format
 format:
 	$(call install_tool,ruff)
@@ -125,6 +112,34 @@ lint:
 	@echo "✅ 检查完成"
 
 
+#HELP clean@清理项目
+.PHONY: clean
+clean:
+	$(call clean_handler)
+	@echo "✅ 项目清理完成"
+
+
+#HELP dev@开发运行（串行）
+.PHONY: dev
+dev:
+	@echo "🚀 开发运行（串行）..."
+	@uv run python src/main.py run-all
+
+
+#HELP run@生产运行（并行）
+.PHONY: run
+run:
+	@echo "🚀 生产运行（并行）..."
+	@uv run python src/main.py run-parallel
+
+
+#HELP scheduler@生产运行（定时）
+.PHONY: scheduler
+scheduler:
+	@echo "⏰ 启动定时调度..."
+	@uv run python src/main.py scheduler
+
+
 #HELP test@运行测试
 .PHONY: test
 test:
@@ -134,56 +149,24 @@ test:
 	@echo "✅ 测试完成，报告位于 output/htmlcov/"
 
 
-#HELP run@运行采集（单个）
-#  make run SOURCE=alerion
-SOURCE ?= alerion
-.PHONY: run
-run:
-	@echo "🚀 运行采集器: $(SOURCE)..."
-	@uv run python src/main.py run --source=$(SOURCE)
+#HELP status@任务状态
+.PHONY: status
+status:
+	@uv run python src/main.py status
 
 
-#HELP run-all@运行所有采集器（串行）
-.PHONY: run-all
-run-all:
-	@echo "🚀 运行所有采集器（串行）..."
-	@uv run python src/main.py run-all
-
-
-#HELP run-parallel@并行运行采集器
-#  make run-parallel COLLECTORS=alerion,asl
-COLLECTORS ?=
-.PHONY: run-parallel
-run-parallel:
-	@echo "🚀 并行运行采集器..."
-	@if [ -n "$(COLLECTORS)" ]; then \
-		uv run python src/main.py run-parallel --collectors=$(COLLECTORS); \
-	else \
-		uv run python src/main.py run-parallel; \
-	fi
-
-
-#HELP dry-run@试运行（不保存）
-.PHONY: dry-run
-dry-run:
-	@echo "🚀 试运行所有采集器（不保存）..."
-	@uv run python src/main.py run-all --dry-run
-
-
-#HELP scheduler@启动定时调度
-.PHONY: scheduler
-scheduler:
-	@echo "⏰ 启动定时调度..."
-	@uv run python src/main.py scheduler
-
-
-#HELP list@列出所有采集器
+#HELP list@采集列表
 .PHONY: list
 list:
 	@uv run python src/main.py list
 
 
-#HELP status@查看任务状态
-.PHONY: status
-status:
-	@uv run python src/main.py status
+#HELP help@查看帮助
+.PHONY: help
+help: Makefile
+	@echo "Usage:  make [command] [options]"
+	@echo
+	@echo "Available Commands:"
+	@sed -n "s/^#HELP//p" $(firstword $(MAKEFILE_LIST)) | awk -F'@' '{ printf "  \033[1;31m%-16s\033[0m%s\n", $$1, $$2 }'
+	@echo
+

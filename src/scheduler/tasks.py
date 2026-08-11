@@ -101,7 +101,8 @@ def run_parallel_collectors(collector_names: List[str] = None) -> Dict[str, Any]
     Returns:
         任务执行结果
     """
-    from src.scheduler.task_manager import task_manager
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from src.settings import settings
 
     if collector_names is None:
         collector_names = list_collectors()
@@ -109,27 +110,19 @@ def run_parallel_collectors(collector_names: List[str] = None) -> Dict[str, Any]
     logger.info(f"[Task] 开始并行采集: {collector_names}")
     start_time = datetime.now()
 
-    # 提交所有任务到线程池
-    futures = {}
-    for name in collector_names:
-        task_id = f"collect_{name}_{int(datetime.now().timestamp())}"
-        futures[name] = task_manager.submit_task(
-            task_id=task_id,
-            func=lambda n=name: run_collector(n)
-        )
-
-    # 等待所有任务完成（通过 task_manager 的状态追踪）
-    # 这里直接串行等待，实际生产中可以用更复杂的同步机制
     total_result = {"total": 0, "success": 0, "failed": 0}
-    for name in collector_names:
-        try:
-            result = run_collector(name)
-            total_result["total"] += result["total"]
-            total_result["success"] += result["success"]
-            total_result["failed"] += result["failed"]
-        except Exception as e:
-            logger.error(f"[Task] {name} 执行失败: {e}")
-            continue
+
+    with ThreadPoolExecutor(max_workers=settings.MAX_WORKERS) as executor:
+        futures = {executor.submit(run_collector, name): name for name in collector_names}
+        for future in as_completed(futures):
+            name = futures[future]
+            try:
+                result = future.result()
+                total_result["total"] += result["total"]
+                total_result["success"] += result["success"]
+                total_result["failed"] += result["failed"]
+            except Exception as e:
+                logger.error(f"[Task] {name} 执行失败: {e}")
 
     elapsed = (datetime.now() - start_time).total_seconds()
     logger.info(

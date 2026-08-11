@@ -90,7 +90,7 @@ $ spider-awesome/
 │   └── main.py                #  主入口
 ├── configs/                   #  环境配置
 ├── tests/                     #  测试
-├── var/                       #  运行时数据（db/logs/cache）
+├── var/                       #  运行时数据（database/raw/logs/cache/tmp）
 ├── Makefile
 ├── pyproject.toml
 └── README.md
@@ -108,15 +108,13 @@ Available Commands:
    init           初始化环境
    clean          清理项目
    format         格式化代码
-   lint           质量检查
-   run            运行采集器
-   run-all        运行所有采集器（串行）
-   run-parallel   并行运行采集器
-   dry-run        试运行（不保存）
-   scheduler      启动定时调度
-   list           列出所有采集器
-   status         查看任务状态
+   lint           代码检查
    test           运行测试
+   dev            开发运行（串行）
+   run            生产运行（并行）
+   scheduler      启动定时调度
+   status         查看任务状态
+   list           列出所有采集器
    help           查看帮助
 ```
 
@@ -129,8 +127,8 @@ $ make init
 🌍 「开发」同步依赖项...
 ✅  依赖安装完成
 
-$ make run-all
-🚀  运行所有采集器（串行）...
+$ make dev
+🚀  开发运行（串行）...
 ✅  [alerion] 采集完成: 125 条
 ✅  [asl] 采集完成: 89 条
 ✅  [noble] 采集完成: 234 条
@@ -220,7 +218,7 @@ class NewSiteCollector(BaseCollector):
 
 ```bash
 # Linux / macOS
-ENV_MODE=dev make run-all
+ENV_MODE=dev make dev
 ENV_MODE=prod make scheduler
 
 # Windows PowerShell
