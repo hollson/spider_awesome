@@ -115,8 +115,27 @@ class HttpClient:
             return response
         except requests.RequestException as e:
             elapsed = time.time() - start_time
-            logger.error(f"[HTTP] {method} {url} failed ({elapsed:.2f}s): {e}")
+            hint = self._error_hint(e)
+            logger.error(f"[HTTP] {method} {url} ({elapsed:.1f}s) - {hint}")
             raise
+
+    @staticmethod
+    def _error_hint(e: requests.RequestException) -> str:
+        """将异常转为简短中文提示"""
+        msg = str(e)
+        if "SSLError" in msg or "CERTIFICATE_VERIFY_FAILED" in msg:
+            return "SSL证书验证失败，请检查网络或站点证书配置"
+        if "ConnectionError" in msg or "ConnectionRefused" in msg:
+            return "连接失败，请检查网络或站点是否可访问"
+        if "Timeout" in msg:
+            return "请求超时，请稍后重试"
+        if "404" in msg:
+            return "接口不存在（404），请确认地址是否正确"
+        if "403" in msg:
+            return "访问被拒绝（403），请检查权限或IP是否被限制"
+        if "500" in msg or "502" in msg or "503" in msg:
+            return "服务端异常，请稍后重试"
+        return str(e)[:120]
 
     def get(self, url: str, **kwargs) -> requests.Response:
         """GET 请求"""

@@ -33,7 +33,7 @@ class NobleExampleCollector(BaseCollector):
         return "example_noble"
 
     def _make_request(self) -> str:
-        response = self.http_client.get(url=self.API_URL, headers=self.HEADERS)
+        response = self.http_client.get(url=self.API_URL, headers=self.HEADERS, verify=False)
         return response.text
 
     def fetch(self) -> list[dict[str, Any]]:

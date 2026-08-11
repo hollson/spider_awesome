@@ -26,33 +26,33 @@ def cmd_run(args):
     collector_name = args.source
     logger.info(f"开始采集: {collector_name}")
 
-    try:
-        # 采集
-        collector = get_collector(collector_name)
-        records = collector.fetch()
-        logger.info(f"采集到 {len(records)} 条数据")
+    # 采集（使用 safe_fetch，异常自动降级）
+    collector = get_collector(collector_name)
+    records = collector.safe_fetch()
 
-        # 清洗
-        cleaner = Cleaner()
-        records = cleaner.process(records)
-
-        # 校验
-        validator = Validator()
-        records = validator.process(records)
-
-        # 存储
-        if not args.dry_run:
-            storage = MySQLStorage(auto_create=True)
-            saved = storage.save(records)
-            logger.info(f"保存 {saved} 条数据到数据库")
-        else:
-            logger.info("[Dry Run] 跳过数据库保存")
-            for r in records[:3]:
-                logger.info(f"  Sample: {r.get('source')} - {r.get('title')}")
-
-    except Exception as e:
-        logger.error(f"采集失败: {e}")
+    if not records:
+        logger.warning(f"采集失败: {collector_name}，未获取到数据")
         sys.exit(1)
+
+    logger.info(f"采集到 {len(records)} 条数据")
+
+    # 清洗
+    cleaner = Cleaner()
+    records = cleaner.process(records)
+
+    # 校验
+    validator = Validator()
+    records = validator.process(records)
+
+    # 存储
+    if not args.dry_run:
+        storage = MySQLStorage(auto_create=True)
+        saved = storage.save(records)
+        logger.info(f"保存 {saved} 条数据到数据库")
+    else:
+        logger.info("[Dry Run] 跳过数据库保存")
+        for r in records[:3]:
+            logger.info(f"  Sample: {r.get('source')} - {r.get('title')}")
 
 
 def cmd_run_all(args):
@@ -171,12 +171,10 @@ def _cron_to_chinese(cron: str) -> str:
 
 def cmd_list(args):
     """列出所有采集器"""
-    from src.collector import get_collector_config
     from src.collector.registry import get_collector_schedule
 
     collectors = list_collectors()
     enabled = list_enabled_collectors()
-    config = get_collector_config()
 
     print("\n可用的采集器:")
     print("-" * 65)
@@ -210,6 +208,61 @@ def cmd_status(args):
             f"(耗时 {record['duration']}s, "
             f"成功 {record['success_count']}/{record['total_count']})"
         )
+
+
+def cmd_logs(args):
+    """查看采集审计日志"""
+    from datetime import datetime, timedelta
+
+    from src.storage.models import CollectLog
+    from src.storage.session import SessionLocal
+
+    # 参数处理
+    limit = args.limit or 20
+    collector = args.collector
+    hours = args.hours or 24
+
+    with SessionLocal() as session:
+        query = session.query(CollectLog)
+
+        # 时间范围
+        since = datetime.now() - timedelta(hours=hours)
+        query = query.filter(CollectLog.created_at >= since)
+
+        # 采集器过滤
+        if collector:
+            query = query.filter(CollectLog.collector_name == collector)
+
+        # 按时间倒序
+        logs = query.order_by(CollectLog.created_at.desc()).limit(limit).all()
+
+    if not logs:
+        print(f"\n最近 {hours} 小时内无采集记录")
+        return
+
+    print(f"\n采集审计日志 (最近 {hours} 小时，共 {len(logs)} 条):")
+    print("-" * 80)
+    print(f"  {'时间':<20} {'采集器':<15} {'状态':<10} {'数据量':<10} {'耗时':<10}")
+    print("-" * 80)
+
+    for log in logs:
+        status_icon = "✅" if log.status == "success" else "❌"
+        time_str = log.created_at.strftime("%m-%d %H:%M:%S") if log.created_at else "-"
+        print(
+            f"  {time_str:<20} {log.collector_name:<15} "
+            f"{status_icon} {log.status:<8} {log.data_count:<10} {log.duration or 0:.1f}s"
+        )
+
+    print()
+
+    # 显示失败详情
+    failed_logs = [log for log in logs if log.status == "fail" and log.error_msg]
+    if failed_logs:
+        print("失败详情:")
+        print("-" * 80)
+        for log in failed_logs[:5]:  # 只显示最近5条失败
+            print(f"  [{log.collector_name}] {log.error_msg[:60]}")
+        print()
 
 
 def _print_banner():
@@ -272,6 +325,13 @@ def main():
     # status 命令
     status_parser = subparsers.add_parser("status", help="查看任务状态")
     status_parser.set_defaults(func=cmd_status)
+
+    # logs 命令
+    logs_parser = subparsers.add_parser("logs", help="查看采集审计日志")
+    logs_parser.add_argument("--limit", "-l", type=int, default=20, help="显示条数 (默认20)")
+    logs_parser.add_argument("--collector", "-c", help="指定采集器名称")
+    logs_parser.add_argument("--hours", type=int, default=24, help="查询最近N小时 (默认24)")
+    logs_parser.set_defaults(func=cmd_logs)
 
     args = parser.parse_args()
 

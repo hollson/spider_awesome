@@ -184,6 +184,12 @@ list:
 	@uv run python src/main.py list
 
 
+#HELP logs@审计日志
+.PHONY: logs
+logs:
+	@uv run python src/main.py logs
+
+
 #HELP help@查看帮助
 .PHONY: help
 help: Makefile

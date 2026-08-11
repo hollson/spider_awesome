@@ -223,6 +223,16 @@ class TaskManager:
                     f"(耗时 {record.duration:.1f}s, "
                     f"成功 {record.success_count}/{record.total_count})"
                 )
+
+                # 记录审计日志
+                self._save_collect_log(
+                    collector_name=task_id,
+                    status="success",
+                    data_count=record.total_count,
+                    new_count=record.success_count,
+                    duplicate_count=record.failed_count,
+                    duration=record.duration,
+                )
                 return
 
             except Exception as e:
@@ -237,6 +247,15 @@ class TaskManager:
                     record.end_time = datetime.now()
                     record.duration = (record.end_time - record.start_time).total_seconds()
                     logger.error(f"[Scheduler] 任务 {task_id} 最终失败 (已重试 {self.retry_count} 次)")
+
+                    # 记录失败审计日志
+                    self._save_collect_log(
+                        collector_name=task_id,
+                        status="fail",
+                        data_count=0,
+                        duration=record.duration,
+                        error_msg=record.error_message,
+                    )
 
     def submit_task(self, task_id: str, func: Callable) -> str:
         """
@@ -283,6 +302,51 @@ class TaskManager:
         """列出所有任务"""
         for job_id, config in self._tasks.items():
             logger.info(f"  - {job_id}: {config}")
+
+    def _save_collect_log(
+        self,
+        collector_name: str,
+        status: str,
+        data_count: int = 0,
+        new_count: int = 0,
+        update_count: int = 0,
+        duplicate_count: int = 0,
+        duration: float = 0,
+        error_msg: str = "",
+    ):
+        """
+        保存采集审计日志到数据库
+
+        Args:
+            collector_name: 采集器名称
+            status: 执行状态 (success/partial/fail)
+            data_count: 采集数据条数
+            new_count: 新增条数
+            update_count: 更新条数
+            duplicate_count: 去重条数
+            duration: 执行耗时(秒)
+            error_msg: 错误信息
+        """
+        try:
+            from src.storage.models import CollectLog
+            from src.storage.session import SessionLocal
+
+            with SessionLocal() as session:
+                log = CollectLog(
+                    collector_name=collector_name,
+                    status=status,
+                    data_count=data_count,
+                    new_count=new_count,
+                    update_count=update_count,
+                    duplicate_count=duplicate_count,
+                    duration=round(duration, 2),
+                    error_msg=error_msg if error_msg else None,
+                )
+                session.add(log)
+                session.commit()
+                logger.debug(f"[Audit] 记录审计日志: {collector_name} {status}")
+        except Exception as e:
+            logger.warning(f"[Audit] 保存审计日志失败: {e}")
 
 
 # 全局任务管理器实例

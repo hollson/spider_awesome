@@ -70,226 +70,33 @@ graph LR
     style D3 fill:#E67E22,color:#fff
 ```
 
-## 🗂️ 项目结构
 
-```bash
-$ spider-awesome/
-├── src/                       #  核心代码
-│   ├── collector/             # 【采集层】数据拉取
-│   │   ├── base_collector.py  #  采集器抽象基类
-│   │   ├── registry.py        #  采集器注册表（自动发现）
-│   │   └── source_*.py        #  具体采集器实现（*为站点名）
-│   ├── processor/             # 【处理层】清洗、校验
-│   │   ├── cleaner.py         #  数据清洗（去重/空值过滤）
-│   │   └── validator.py       #  数据校验（Pydantic）
-│   ├── storage/               # 【存储层】持久化
-│   │   ├── base_storage.py    #  存储抽象基类
-│   │   ├── mysql_store.py     #  多数据库存储（SQLite/PG/MySQL）
-│   │   ├── models.py          #  ORM 模型（SQLAlchemy）
-│   │   └── session.py         #  数据库会话管理
-│   ├── scheduler/             # 【调度层】定时任务
-│   │   ├── task_manager.py    #  任务管理器（并发控制、失败重试）
-│   │   └── tasks.py           #  任务定义
-│   ├── common/                #  公共层
-│   │   ├── logger.py          #  日志（Loguru，按天轮转）
-│   │   ├── http_client.py     #  HTTP 客户端
-│   │   └── utils.py           #  工具函数
-│   ├── env_loader.py          #  环境配置加载器
-│   ├── settings.py            #  配置类
-│   └── main.py                #  主入口
-├── configs/                   #  环境配置
-│   ├── .env                   #  公共基础配置
-│   ├── .env.dev               #  开发环境配置
-│   ├── .env.prod              #  生产环境配置
-│   ├── collectors.yml         #  采集器配置（主配置）
-│   ├── collectors.example.yml #  采集器配置（完整示例）
-│   └── collectors.local.yml   #  采集器本地覆盖（不提交 git）
-├── tests/                     #  测试
-├── var/                       #  运行时数据（全部 gitignore）
-│   ├── database/              #  数据库文件
-│   ├── raw/                   #  采集器原始缓存
-│   ├── logs/                  #  日志文件
-│   └── output/                #  测试覆盖率报告
-├── Makefile
-├── pyproject.toml
-└── README.md
-```
+<br/>
+
 
 ## 🚀 快速开始
 
-- **帮助命令**
-
 ```bash
-$ make help
+$ make
 Usage:  make [command] [options]
 
 Available Commands:
-   init           初始化环境
-   clean          清理项目
-   format         格式化代码
+   init           初始化
+   format         格式化
    lint           代码检查
    bandit         安全扫描
-   test           运行测试
+   clean          清理项目
    dev            开发运行（串行）
    run            生产运行（并行）
-   scheduler      启动定时调度
-   status         查看任务状态
-   list           列出所有采集器
+   scheduler      生产运行（定时）
+   test           运行测试
+   status         任务状态
+   list           采集列表
+   logs           审计日志
    help           查看帮助
 ```
 
-- **启动采集**
-
-```bash
-$ make init
-🌌  检查并初始化环境...
-✅  UV 已安装: uv 0.9.26
-🌍 「开发」同步依赖项...
-✅  依赖安装完成
-
-$ make dev
-🚀  开发运行（串行）...
-✅  [alerion] 采集完成: 125 条
-✅  [asl] 采集完成: 89 条
-✅  [noble] 采集完成: 234 条
-📊  总计: 448 条数据
-```
-
-## 🗄️ 数据库配置
-
-统一使用 `DATABASE_URL` 连接串，切换只需改一行：
-
-```bash
-# configs/.env
-
-# SQLite（默认）
-DATABASE_URL=sqlite:///var/database/spider_awesome.sqlite3
-
-# PostgreSQL
-DATABASE_URL=postgresql://postgres:password@127.0.0.1:5432/spider_awesome
-
-# MySQL
-DATABASE_URL=mysql+pymysql://root:password@192.168.101.251:3306/spider_awesome
-```
-
-## 📡 采集器配置
-
-### 自动发现机制
-
-采集器文件放在 `src/collector/` 目录下，自动发现，无需手动注册：
-
-```
-src/collector/
-├── source_alerion.py    # 自动发现 → alerion
-├── source_asl.py        # 自动发现 → asl
-└── source_mymusic.py    # 用户新增 → mymusic
-```
-
-### 配置文件
-
-```yaml
-# configs/collectors.yml
-
-scheduler:
-  parallel: false
-  default_cron: "0 0 * * *"
-  max_workers: 5
-  timeout: 300
-  retry: 3
-
-collectors:
-  alerion:
-    enabled: true
-    cron: "0 */2 * * *"        # 每 2 小时
-
-  asl:
-    enabled: true
-    cron: "30 0 * * *"         # 每天 00:30
-    timeout: 600
-
-  noble:
-    enabled: false             # 禁用
-```
-
-### ENV 覆盖
-
-```bash
-# 临时启用/禁用采集器
-COLLECTOR_ALERION_ENABLED=true
-COLLECTOR_NOBLE_ENABLED=false
-
-# 覆盖调度时间
-COLLECTOR_ASL_CRON=0 */3 * * *
-```
-
-## ➕ 添加新采集器
-
-1. **创建采集器文件**（自动发现）
-
-```python
-# src/collector/source_mymusic.py
-from src.collector.base_collector import BaseCollector
-
-class MyMusicCollector(BaseCollector):
-    @property
-    def name(self) -> str:
-        return "mymusic"
-
-    def fetch(self):
-        # 实现采集逻辑
-        return [{"id": "1", "source": "mymusic", ...}]
-```
-
-2. **（可选）添加配置**
-
-```yaml
-# configs/collectors.yml
-collectors:
-  mymusic:
-    enabled: true
-    cron: "0 */6 * * *"
-```
-
-3. **完成！**
-
-```bash
-python src/main.py list  # 看到 mymusic
-python src/main.py run --source=mymusic  # 执行采集
-```
-
-## ⏰ 调度配置
-
-### 串行模式（默认）
-
-```bash
-# 每个采集器按各自的 cron 独立调度
-make scheduler
-```
-
-### 并行模式
-
-```bash
-# 所有采集器并行执行
-SCHEDULER_PARALLEL=true make scheduler
-```
-
-### 采集器独立调度
-
-每个采集器可在 `collectors.yml` 中配置独立的调度时间：
-
-```yaml
-collectors:
-  alerion:
-    cron: "0 */2 * * *"    # 每 2 小时
-  asl:
-    cron: "30 0 * * *"     # 每天 00:30
-  news:
-    cron: "0 */1 * * *"    # 每小时
-```
-
-## 🌍 环境切换
-
-通过 `ENV_MODE` 环境变量切换配置，零代码改动：
+**切换环境：**
 
 ```bash
 # Linux / macOS
@@ -299,6 +106,24 @@ ENV_MODE=prod make scheduler
 # Windows PowerShell
 $env:ENV_MODE="prod"; make scheduler
 ```
+**执行示例：**
+```bash
+$ make dev
+🚀  开 发 运 行 （ 串 行 ） ...
+==================================================
+  启 动  spider_awesome v1.0.0
+  环 境 : dev | 调 试 : True
+  数 据 库 : SQLite
+  日 志 级 别 : DEBUG
+==================================================
+
+12-01 00:47:34 INF __main__:cmd_run_all:63 开 始 执 行 所 有 采 集 任 务
+12-01 00:47:34 INF src.scheduler.tasks:run_all_collectors:82 [Task] 开 始 执 行 所 有 采 集 任 务
+12-01 19:47:34 INF src.scheduler.tasks:run_collector:28 [Task] 开 始 采 集 : example_alerion
+```
+_更多内容，请查看[数据采集项目说明文档](docs/数据采集项目说明文档.md)_
+
+<br/>
 
 ## 📄 许可证
 

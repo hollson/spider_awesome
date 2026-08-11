@@ -71,6 +71,8 @@ def setup_logger() -> None:
     # 5) 抑制 urllib3 等第三方库的重复日志
     logging.getLogger("urllib3").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # 6) 拦截 stdlib logging → Loguru（只转发 WARNING 及以上）
     class InterceptHandler(logging.Handler):

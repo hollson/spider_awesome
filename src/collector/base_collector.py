@@ -1,6 +1,11 @@
 """
 采集器抽象基类
 定义所有采集器必须实现的统一接口
+
+健壮性设计：
+- fetch 异常自动降级，返回空列表，不阻塞调度
+- HTTP 请求自带超时和重试
+- 单个采集器失败不影响其他采集器执行
 """
 
 from abc import ABC, abstractmethod
@@ -20,6 +25,11 @@ class BaseCollector(ABC):
     所有采集器必须继承此类并实现以下方法：
     - name: 采集器名称
     - fetch(): 执行采集并返回数据列表
+
+    健壮性保证：
+    - fetch() 异常时返回空列表，不会抛出异常
+    - HTTP 请求自带超时和重试
+    - 单个采集器失败不影响其他采集器
     """
 
     _http_client: HttpClient | None
@@ -42,12 +52,35 @@ class BaseCollector(ABC):
     @abstractmethod
     def fetch(self) -> list[dict[str, Any]]:
         """
-        执行采集
+        执行采集（子类必须实现）
 
         Returns:
             采集到的数据列表（字典格式）
+
+        Raises:
+            允许抛出异常，会被 safe_fetch 捕获
         """
         raise NotImplementedError
+
+    def safe_fetch(self) -> list[dict[str, Any]]:
+        """
+        安全执行采集（带异常捕获和降级）
+
+        - 捕获所有异常，返回空列表
+        - 记录错误日志，不阻塞调度
+        - 适用于无人值守场景
+
+        Returns:
+            采集到的数据列表，失败时返回空列表
+        """
+        try:
+            records = self.fetch()
+            return records if isinstance(records, list) else []
+        except KeyboardInterrupt:
+            raise  # 允许用户中断
+        except Exception as e:
+            logger.error(f"[{self.name}] 采集异常，已降级: {e}")
+            return []
 
     def close(self) -> None:
         """释放资源"""

@@ -34,9 +34,9 @@ def run_collector(collector_name: str) -> dict[str, Any]:
     persist = schedule.get("persist", True)  # 默认持久化
 
     try:
-        # 1. 采集
+        # 1. 采集（使用 safe_fetch，异常自动降级）
         collector = get_collector(collector_name)
-        records = collector.fetch()
+        records = collector.safe_fetch()
         result["total"] = len(records)
 
         # 2. 清洗
@@ -66,9 +66,9 @@ def run_collector(collector_name: str) -> dict[str, Any]:
         )
         return result
 
-    except Exception as e:
+    except Exception:
         elapsed = (datetime.now() - start_time).total_seconds()
-        logger.error(f"[Task] 采集失败: {collector_name} ({elapsed:.1f}s) - {e}")
+        logger.warning(f"[Task] 采集失败: {collector_name} ({elapsed:.1f}s)")
         raise
 
 
@@ -91,8 +91,8 @@ def run_all_collectors() -> dict[str, Any]:
             total_result["total"] += result["total"]
             total_result["success"] += result["success"]
             total_result["failed"] += result["failed"]
-        except Exception as e:
-            logger.error(f"[Task] {name} 执行失败: {e}")
+        except Exception:
+            logger.warning(f"[Task] {name} 执行失败")
             continue
 
     elapsed = (datetime.now() - start_time).total_seconds()
