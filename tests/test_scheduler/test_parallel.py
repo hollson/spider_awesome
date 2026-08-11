@@ -44,7 +44,7 @@ def _mock_save(records):
 class TestParallelExecution:
     """并行执行测试"""
 
-    @patch("src.scheduler.tasks.MySQLStorage")
+    @patch("src.scheduler.tasks.DataStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_faster_than_serial(self, mock_list, mock_get, mock_storage_cls):
@@ -70,7 +70,7 @@ class TestParallelExecution:
         assert result["success"] == 6
         assert result["failed"] == 0
 
-    @patch("src.scheduler.tasks.MySQLStorage")
+    @patch("src.scheduler.tasks.DataStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_subset_collectors(self, mock_list, mock_get, mock_storage_cls):
@@ -90,7 +90,7 @@ class TestParallelExecution:
         assert result["total"] == 4
         assert result["success"] == 4
 
-    @patch("src.scheduler.tasks.MySQLStorage")
+    @patch("src.scheduler.tasks.DataStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_single_collector(self, mock_list, mock_get, mock_storage_cls):
@@ -107,7 +107,7 @@ class TestParallelExecution:
         assert 1.5 < elapsed < 3.0
         assert result["total"] == 2
 
-    @patch("src.scheduler.tasks.MySQLStorage")
+    @patch("src.scheduler.tasks.DataStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_partial_failure(self, mock_list, mock_get, mock_storage_cls):
@@ -128,7 +128,7 @@ class TestParallelExecution:
         assert result["total"] == 4
         assert result["success"] == 4
 
-    @patch("src.scheduler.tasks.MySQLStorage")
+    @patch("src.scheduler.tasks.DataStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_result_structure(self, mock_list, mock_get, mock_storage_cls):

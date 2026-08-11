@@ -10,7 +10,7 @@ from src.collector import get_collector, list_enabled_collectors
 from src.common.logger import logger
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
-from src.storage.mysql_store import MySQLStorage
+from src.storage.store import DataStorage
 
 
 def run_collector(collector_name: str) -> dict[str, Any]:
@@ -49,7 +49,7 @@ def run_collector(collector_name: str) -> dict[str, Any]:
 
         # 4. 存储（根据配置决定是否入库）
         if persist:
-            storage = MySQLStorage(auto_create=True)
+            storage = DataStorage(auto_create=True)
             saved = storage.save(records)
             result["success"] = saved
             result["failed"] = len(records) - saved
@@ -64,12 +64,64 @@ def run_collector(collector_name: str) -> dict[str, Any]:
             f"[Task] 采集完成: {collector_name} (采集 {result['total']} 条, "
             f"{'保存' if persist else '处理'} {result['success']} 条, 耗时 {elapsed:.1f}s)"
         )
+
+        # 记录审计日志
+        _save_collect_log(
+            collector_name=collector_name,
+            status="success",
+            data_count=result["total"],
+            new_count=result["success"],
+            duplicate_count=result["failed"],
+            duration=elapsed,
+        )
+
         return result
 
-    except Exception:
+    except Exception as e:
         elapsed = (datetime.now() - start_time).total_seconds()
         logger.warning(f"[Task] 采集失败: {collector_name} ({elapsed:.1f}s)")
+
+        # 记录失败审计日志
+        _save_collect_log(
+            collector_name=collector_name,
+            status="fail",
+            data_count=0,
+            duration=elapsed,
+            error_msg=str(e),
+        )
         raise
+
+
+def _save_collect_log(
+    collector_name: str,
+    status: str,
+    data_count: int = 0,
+    new_count: int = 0,
+    update_count: int = 0,
+    duplicate_count: int = 0,
+    duration: float = 0,
+    error_msg: str = "",
+):
+    """保存审计日志"""
+    from src.storage.models import CollectLog
+    from src.storage.session import get_db_instance
+
+    try:
+        with get_db_instance().get_session() as session:
+            log = CollectLog(
+                collector_name=collector_name,
+                status=status,
+                data_count=data_count,
+                new_count=new_count,
+                update_count=update_count,
+                duplicate_count=duplicate_count,
+                duration=round(duration, 2),
+                error_msg=error_msg if error_msg else None,
+            )
+            session.add(log)
+            session.commit()
+    except Exception as e:
+        logger.warning(f"[Audit] 保存审计日志失败: {e}")
 
 
 def run_all_collectors() -> dict[str, Any]:

@@ -1,10 +1,10 @@
 """
-MySQL 存储实现
+数据存储实现
 使用 SQLAlchemy 进行数据持久化
 
 支持两种存储模式：
-- BaseStorage: 通用存储，使用 BaseRecord 表，适用于所有类型的爬虫
-- MySQLStorage: 航空业务存储，使用 DataRecord 表，包含航空业务特定字段
+- BaseRecordStorage: 通用存储，使用 BaseRecord 表，适用于所有类型的爬虫
+- DataStorage: 航空业务存储，使用 DataRecord 表，包含航空业务特定字段
 """
 
 from typing import Any
@@ -48,8 +48,9 @@ class BaseRecordStorage(BaseStorage):
         if not records:
             return 0
 
-        logger.info(f"[BaseRecordStorage] 开始保存 {len(records)} 条数据")
+        logger.info(f"[Storage] 开始保存 {len(records)} 条数据")
         saved_count = 0
+        skipped_count = 0
         with get_db_instance().get_session() as session:
             for record in records:
                 try:
@@ -60,6 +61,7 @@ class BaseRecordStorage(BaseStorage):
                     # 检查是否已存在
                     existing = session.query(BaseRecord).filter_by(id=record_id).first()
                     if existing:
+                        skipped_count += 1
                         logger.debug(f"记录已存在，跳过: {record_id}")
                         continue
 
@@ -83,7 +85,10 @@ class BaseRecordStorage(BaseStorage):
 
             session.commit()
 
-        logger.info(f"[BaseRecordStorage] 保存完成: {saved_count}/{len(records)} 条")
+        if skipped_count > 0:
+            logger.info(f"[Storage] 保存完成: 新增 {saved_count} 条, 去重跳过 {skipped_count} 条")
+        else:
+            logger.info(f"[Storage] 保存完成: {saved_count}/{len(records)} 条")
         return saved_count
 
     def exists(self, record_id: str) -> bool:
@@ -129,7 +134,7 @@ class BaseRecordStorage(BaseStorage):
             return [r.to_dict() for r in records]
 
 
-class MySQLStorage(BaseRecordStorage):
+class DataStorage(BaseRecordStorage):
     """
     航空业务数据存储（使用 DataRecord 表）
 
@@ -150,8 +155,9 @@ class MySQLStorage(BaseRecordStorage):
         if not records:
             return 0
 
-        logger.info(f"[MySQLStorage] 开始保存 {len(records)} 条数据")
+        logger.info(f"[Storage] 开始保存 {len(records)} 条数据")
         saved_count = 0
+        skipped_count = 0
         with get_db_instance().get_session() as session:
             for record in records:
                 try:
@@ -162,6 +168,7 @@ class MySQLStorage(BaseRecordStorage):
                     # 检查是否已存在
                     existing = session.query(DataRecord).filter_by(id=record_id).first()
                     if existing:
+                        skipped_count += 1
                         logger.debug(f"记录已存在，跳过: {record_id}")
                         continue
 
@@ -206,7 +213,10 @@ class MySQLStorage(BaseRecordStorage):
 
             session.commit()
 
-        logger.info(f"[MySQLStorage] 保存完成: {saved_count}/{len(records)} 条")
+        if skipped_count > 0:
+            logger.info(f"[Storage] 保存完成: 新增 {saved_count} 条, 去重跳过 {skipped_count} 条")
+        else:
+            logger.info(f"[Storage] 保存完成: {saved_count}/{len(records)} 条")
         return saved_count
 
     def query(

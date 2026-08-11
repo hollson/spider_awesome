@@ -15,10 +15,17 @@ def _supports_color() -> bool:
     if os.environ.get("NO_COLOR") or os.environ.get("TERM") == "dumb":
         return False
 
-    # Windows 10+ 支持 ANSI，需先激活
+    # Windows 10+ 支持 ANSI，需通过 API 激活
     if sys.platform == "win32":
         try:
-            os.system("")  # 触发 Windows 10+ ANSI 支持
+            import ctypes
+
+            kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+            # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+            handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
+            mode = ctypes.c_ulong()
+            kernel32.GetConsoleMode(handle, ctypes.byref(mode))
+            kernel32.SetConsoleMode(handle, mode.value | 0x0004)
         except Exception:
             return False
 

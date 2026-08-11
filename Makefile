@@ -146,27 +146,31 @@ clean:
 .PHONY: dev
 dev:
 	@echo "🚀 开发运行（串行）..."
-	@uv run python src/main.py run-all
+	@mkdir -p var && echo "dev" > var/.env_mode
+	@ENV_MODE=dev uv run python src/main.py run-all
 
 
 #HELP run@生产运行（并行）
 .PHONY: run
 run:
 	@echo "🚀 生产运行（并行）..."
-	@uv run python src/main.py run-parallel
+	@mkdir -p var && echo "prod" > var/.env_mode
+	@ENV_MODE=prod uv run python src/main.py run-parallel
 
 
 #HELP scheduler@生产运行（定时）
 .PHONY: scheduler
 scheduler:
 	@echo "⏰ 启动定时调度..."
-	@uv run python src/main.py scheduler
+	@mkdir -p var && echo "prod" > var/.env_mode
+	@ENV_MODE=prod uv run python src/main.py scheduler
 
 
 #HELP test@运行测试
 .PHONY: test
 test:
 	@echo "🧪 运行测试..."
+	@mkdir -p var && echo "test" > var/.env_mode
 	@mkdir -p var/coverage/data var/coverage/report
 	@ENV_MODE=test COVERAGE_FILE=var/coverage/data/.coverage uv run pytest tests/ -v --cov=src --cov-report=html:var/coverage/report/htmlcov --cov-report=xml:var/coverage/report/coverage.xml --cov-report=term-missing
 	@echo "✅ 测试完成，报告位于 var/coverage/report/htmlcov/"
@@ -187,7 +191,13 @@ list:
 #HELP logs@审计日志
 .PHONY: logs
 logs:
-	@uv run python src/main.py logs
+	@if [ -f var/.env_mode ]; then \
+		ENV=$$(cat var/.env_mode); \
+		echo "📋 查看审计日志 (环境: $$ENV)"; \
+		ENV_MODE=$$ENV uv run python src/main.py logs; \
+	else \
+		echo "⚠️  未找到运行记录，请先执行 make dev/make run/make scheduler"; \
+	fi
 
 
 #HELP help@查看帮助

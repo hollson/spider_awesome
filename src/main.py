@@ -17,7 +17,7 @@ from src.common.logger import logger
 from src.processor.cleaner import Cleaner
 from src.processor.validator import Validator
 from src.settings import settings
-from src.storage.mysql_store import MySQLStorage
+from src.storage.store import DataStorage
 
 
 def cmd_run(args):
@@ -46,7 +46,7 @@ def cmd_run(args):
 
     # 存储
     if not args.dry_run:
-        storage = MySQLStorage(auto_create=True)
+        storage = DataStorage(auto_create=True)
         saved = storage.save(records)
         logger.info(f"保存 {saved} 条数据到数据库")
     else:
@@ -215,14 +215,14 @@ def cmd_logs(args):
     from datetime import datetime, timedelta
 
     from src.storage.models import CollectLog
-    from src.storage.session import SessionLocal
+    from src.storage.session import get_db_instance
 
     # 参数处理
     limit = args.limit or 20
     collector = args.collector
     hours = args.hours or 24
 
-    with SessionLocal() as session:
+    with get_db_instance().get_session() as session:
         query = session.query(CollectLog)
 
         # 时间范围
@@ -233,8 +233,18 @@ def cmd_logs(args):
         if collector:
             query = query.filter(CollectLog.collector_name == collector)
 
-        # 按时间倒序
-        logs = query.order_by(CollectLog.created_at.desc()).limit(limit).all()
+        # 按时间倒序，转换为字典列表
+        logs = [
+            {
+                "collector_name": log.collector_name,
+                "status": log.status,
+                "data_count": log.data_count,
+                "duration": log.duration,
+                "error_msg": log.error_msg,
+                "created_at": log.created_at,
+            }
+            for log in query.order_by(CollectLog.created_at.desc()).limit(limit).all()
+        ]
 
     if not logs:
         print(f"\n最近 {hours} 小时内无采集记录")
@@ -246,22 +256,22 @@ def cmd_logs(args):
     print("-" * 80)
 
     for log in logs:
-        status_icon = "✅" if log.status == "success" else "❌"
-        time_str = log.created_at.strftime("%m-%d %H:%M:%S") if log.created_at else "-"
+        status_icon = "✅" if log["status"] == "success" else "❌"
+        time_str = log["created_at"].strftime("%m-%d %H:%M:%S") if log["created_at"] else "-"
         print(
-            f"  {time_str:<20} {log.collector_name:<15} "
-            f"{status_icon} {log.status:<8} {log.data_count:<10} {log.duration or 0:.1f}s"
+            f"  {time_str:<20} {log['collector_name']:<15} "
+            f"{status_icon} {log['status']:<8} {log['data_count']:<10} {log['duration'] or 0:.1f}s"
         )
 
     print()
 
     # 显示失败详情
-    failed_logs = [log for log in logs if log.status == "fail" and log.error_msg]
+    failed_logs = [log for log in logs if log["status"] == "fail" and log["error_msg"]]
     if failed_logs:
         print("失败详情:")
         print("-" * 80)
         for log in failed_logs[:5]:  # 只显示最近5条失败
-            print(f"  [{log.collector_name}] {log.error_msg[:60]}")
+            print(f"  [{log['collector_name']}] {log['error_msg'][:60]}")
         print()
 
 
