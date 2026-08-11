@@ -34,24 +34,52 @@ scheduler:
 # ===========================================================================
 # 采集器配置
 # ===========================================================================
-# 格式：{name}: {enabled, cron, timeout, retry, config}
-# 完整示例参考 collectors.example.yml
+# 格式：{name}: {enabled, cron, timeout, retry, persist, config}
+#
+# persist: 是否持久化到数据库（默认 true）
+#   - true: 采集数据保存到数据库
+#   - false: 只走采集→清洗→校验流程，不入库（用于并发测试）
+#
+# 注意：name 必须与 source_*.py 文件名对应
+#   source_example_alerion.py → example_alerion
+#   source_example_asl.py → example_asl
+#   source_example_noble.py → example_noble
+#   source_example.py → example_slow, example_medium, example_fast
 # ===========================================================================
 
 collectors:
-  # ----- 示例采集器（飞机数据）-----
-  alerion:
+  # ----- 示例采集器（衍生项目可参考或删除）-----
+  example_alerion:
     enabled: true
     cron: "0 */2 * * *"        # 每 2 小时
+    persist: true
 
-  asl:
+  example_asl:
     enabled: true
     cron: "30 0 * * *"         # 每天 00:30
     timeout: 600
+    persist: true
 
-  noble:
-    enabled: false
-
-  example:
+  example_noble:
     enabled: true
-    cron: "0 */6 * * *"        # 每 6 小时
+    cron: "0 */3 * * *"        # 每 3 小时
+    persist: true
+
+  # ----- 并发模拟采集器（用于测试并发，不入库）-----
+  example_slow:
+    enabled: false             # 默认禁用，测试时手动启用
+    cron: "*/5 * * * *"        # 每 5 分钟
+    timeout: 30
+    persist: false             # 不入库，只走流程
+
+  example_medium:
+    enabled: false
+    cron: "*/5 * * * *"
+    timeout: 30
+    persist: false
+
+  example_fast:
+    enabled: false
+    cron: "*/5 * * * *"
+    timeout: 30
+    persist: false

@@ -38,7 +38,7 @@ def _discover_collectors() -> dict[str, type[BaseCollector]]:
                 attr = getattr(module, attr_name)
                 if isinstance(attr, type) and issubclass(attr, BaseCollector) and attr is not BaseCollector:
                     collectors[name] = attr
-                    logger.debug(f"[Registry] 发现采集器: {name} -> {attr.__name__}")
+                    logger.trace(f"[Registry] 发现采集器: {name} -> {attr.__name__}")
                     break
         except Exception as e:
             logger.warning(f"[Registry] 加载采集器 {name} 失败: {e}")

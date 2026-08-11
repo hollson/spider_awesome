@@ -22,6 +22,7 @@ from src.storage.mysql_store import MySQLStorage
 
 def cmd_run(args):
     """执行单次采集"""
+    _print_banner()
     collector_name = args.source
     logger.info(f"开始采集: {collector_name}")
 
@@ -56,6 +57,7 @@ def cmd_run(args):
 
 def cmd_run_all(args):
     """执行所有采集器"""
+    _print_banner()
     from src.scheduler.tasks import run_all_collectors
 
     logger.info("开始执行所有采集任务")
@@ -67,6 +69,7 @@ def cmd_run_all(args):
 
 def cmd_run_parallel(args):
     """并行执行采集器"""
+    _print_banner()
     from src.scheduler.tasks import run_parallel_collectors
 
     # 解析采集器列表
@@ -81,6 +84,7 @@ def cmd_run_parallel(args):
 
 def cmd_scheduler(args):
     """启动定时调度"""
+    _print_banner()
     from src.collector import get_collector_schedule
     from src.scheduler.task_manager import task_manager
     from src.scheduler.tasks import parse_cron_to_hour_minute, run_all_collectors, run_parallel_collectors
@@ -174,6 +178,19 @@ def cmd_status(args):
         )
 
 
+def _print_banner():
+    """打印启动横幅"""
+    from src.common.color import banner_label, banner_line, banner_title
+
+    db_display = settings.DATABASE_URL.split("@")[-1] if "@" in settings.DATABASE_URL else "SQLite"
+    print(banner_line())
+    print(banner_title(f"  启动 {settings.APP_NAME} v{settings.APP_VERSION}"))
+    print(banner_label("环境", settings.ENV_MODE) + f" | 调试: {settings.DEBUG}")
+    print(banner_label("数据库", db_display))
+    print(banner_label("日志级别", settings.LOG_LEVEL))
+    print(banner_line() + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="数据采集模板项目",
@@ -232,11 +249,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logger.info("=" * 50)
-    logger.info(f"启动 {settings.APP_NAME} v{settings.APP_VERSION}")
-    logger.info(f"环境: {settings.ENV_MODE} | 调试: {settings.DEBUG}")
-    logger.info(f"数据库: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else 'SQLite'}")
-    logger.info(f"日志级别: {settings.LOG_LEVEL}")
-    logger.info(f"已启用采集器: {', '.join(list_enabled_collectors())}")
-    logger.info("=" * 50)
     main()

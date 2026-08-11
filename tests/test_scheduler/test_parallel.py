@@ -46,7 +46,7 @@ class TestParallelExecution:
 
     @patch("src.scheduler.tasks.MySQLStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_collectors", side_effect=_mock_list_collectors)
+    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_faster_than_serial(self, mock_list, mock_get, mock_storage_cls):
         """并行执行总耗时应远小于串行执行"""
         mock_storage_cls.return_value.save.side_effect = _mock_save
@@ -72,7 +72,7 @@ class TestParallelExecution:
 
     @patch("src.scheduler.tasks.MySQLStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_collectors", side_effect=_mock_list_collectors)
+    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_subset_collectors(self, mock_list, mock_get, mock_storage_cls):
         """并行执行指定采集器子集"""
         mock_storage_cls.return_value.save.side_effect = _mock_save
@@ -92,7 +92,7 @@ class TestParallelExecution:
 
     @patch("src.scheduler.tasks.MySQLStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_collectors", side_effect=_mock_list_collectors)
+    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_single_collector(self, mock_list, mock_get, mock_storage_cls):
         """单个采集器并行执行（退化为串行）"""
         mock_storage_cls.return_value.save.side_effect = _mock_save
@@ -109,7 +109,7 @@ class TestParallelExecution:
 
     @patch("src.scheduler.tasks.MySQLStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_collectors", side_effect=_mock_list_collectors)
+    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_partial_failure(self, mock_list, mock_get, mock_storage_cls):
         """并行执行中部分采集器失败不影响其他"""
         mock_storage_cls.return_value.save.side_effect = _mock_save
@@ -130,7 +130,7 @@ class TestParallelExecution:
 
     @patch("src.scheduler.tasks.MySQLStorage")
     @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_collectors", side_effect=_mock_list_collectors)
+    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_result_structure(self, mock_list, mock_get, mock_storage_cls):
         """验证返回结果结构正确"""
         mock_storage_cls.return_value.save.side_effect = _mock_save

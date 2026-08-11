@@ -17,7 +17,7 @@
 # 【采集器发现机制】
 #   采集器自动扫描 src/collector/source_*.py 文件
 #   - 文件名：source_{name}.py → 采集器名称 {name}
-#   - 类名：{Name}Collector（继承 BaseCollector）
+#   - 类名：任意（继承 BaseCollector 即可）
 #   无需手动注册，只需创建文件即可
 #
 # 【新增采集器步骤】
@@ -66,49 +66,75 @@ scheduler:
 #   cron     : 调度时间（覆盖全局 default_cron）
 #   timeout  : 超时时间（覆盖全局 timeout）
 #   retry    : 重试次数（覆盖全局 retry）
+#   persist  : 是否持久化到数据库（默认 true）
+#              - true: 采集数据保存到数据库
+#              - false: 只走采集→清洗→校验流程，不入库（用于并发测试）
 #   config   : 采集器特定配置（自定义，传递给采集器）
 #
 # 【ENV 覆盖格式】
 #   COLLECTOR_{NAME}_{FIELD}=value
 #   示例：
-#     COLLECTOR_ALERION_ENABLED=true
-#     COLLECTOR_ASL_CRON=0 */3 * * *
-#     COLLECTOR_NOBLE_TIMEOUT=600
+#     COLLECTOR_EXAMPLE_ALERION_ENABLED=true
+#     COLLECTOR_EXAMPLE_ASL_CRON=0 */3 * * *
+#     COLLECTOR_EXAMPLE_NOBLE_TIMEOUT=600
 #
 # ===========================================================================
 
 collectors:
 
   # =========================================================================
-  # 示例采集器（飞机数据）
+  # 示例采集器（航空数据，衍生项目可参考或删除）
   # =========================================================================
 
   # Alerion - POST JSON API 采集
-  alerion:
+  example_alerion:
     enabled: true
     cron: "0 */2 * * *"           # 每 2 小时
     timeout: 300
     retry: 3
+    persist: true                 # 入库
     config:                       # 采集器特定配置
       operator_id: "cc2f0c109f7811ec81a473925ff7fe99"
       api_url: "https://int-quoting-legacy.flyeasy.co/api/search"
 
   # ASL - HTML 分页采集
-  asl:
+  example_asl:
     enabled: true
     cron: "30 0 * * *"            # 每天 00:30
     timeout: 600                  # HTML 解析较慢
     retry: 2
+    persist: true
 
-  # Noble - 示例采集器
-  noble:
-    enabled: false                # 暂时禁用
-    cron: "0 0 * * *"
-
-  # Example - 快速示例
-  example:
+  # Noble - GET JSON API 采集
+  example_noble:
     enabled: true
-    cron: "0 */6 * * *"           # 每 6 小时
+    cron: "0 */3 * * *"           # 每 3 小时
+    persist: true
+
+  # =========================================================================
+  # 并发模拟采集器（用于测试并发，不入库）
+  # =========================================================================
+
+  # 慢速采集器（模拟 2s 延迟）
+  example_slow:
+    enabled: false                # 默认禁用，测试时手动启用
+    cron: "*/5 * * * *"           # 每 5 分钟
+    timeout: 30
+    persist: false                # 不入库，只走流程
+
+  # 中速采集器（模拟 1s 延迟）
+  example_medium:
+    enabled: false
+    cron: "*/5 * * * *"
+    timeout: 30
+    persist: false
+
+  # 快速采集器（模拟 0.5s 延迟）
+  example_fast:
+    enabled: false
+    cron: "*/5 * * * *"
+    timeout: 30
+    persist: false
 
   # =========================================================================
   # 音乐相关（示例模板）
@@ -118,6 +144,7 @@ collectors:
   # netease_hot:
   #   enabled: true
   #   cron: "0 */6 * * *"
+  #   persist: true
   #   config:
   #     category: "hot"
   #     limit: 100
@@ -126,6 +153,7 @@ collectors:
   # qq_music:
   #   enabled: true
   #   cron: "0 0 * * *"
+  #   persist: true
   #   config:
   #     top_id: 26
 
@@ -137,6 +165,7 @@ collectors:
   # taobao:
   #   enabled: true
   #   cron: "*/30 * * * *"         # 每 30 分钟
+  #   persist: true
   #   config:
   #     keyword: "手机"
   #     page_size: 20
@@ -145,6 +174,7 @@ collectors:
   # jd_price:
   #   enabled: true
   #   cron: "0 */1 * * *"          # 每小时
+  #   persist: true
   #   config:
   #     sku_ids: ["100012043978"]
 
@@ -156,6 +186,7 @@ collectors:
   # qq_news:
   #   enabled: true
   #   cron: "0 */1 * * *"
+  #   persist: true
   #   config:
   #     category: "news"
 
@@ -163,6 +194,7 @@ collectors:
   # zhihu_hot:
   #   enabled: true
   #   cron: "0 */2 * * *"
+  #   persist: true
 
   # =========================================================================
   # 社交媒体（示例模板）
@@ -172,11 +204,13 @@ collectors:
   # weibo_hot:
   #   enabled: true
   #   cron: "0 */1 * * *"
+  #   persist: true
 
   # Twitter Trending
   # twitter_trending:
   #   enabled: false
   #   cron: "0 */4 * * *"
+  #   persist: true
   #   config:
   #     region: "global"
 
@@ -188,6 +222,7 @@ collectors:
   # stock_price:
   #   enabled: true
   #   cron: "*/5 9-15 * * 1-5"     # 工作日 9-15 点，每 5 分钟
+  #   persist: true
   #   config:
   #     symbols: ["AAPL", "GOOGL", "MSFT"]
 
@@ -195,6 +230,7 @@ collectors:
   # weather:
   #   enabled: true
   #   cron: "0 */3 * * *"
+  #   persist: true
   #   config:
   #     cities: ["beijing", "shanghai"]
 
@@ -206,6 +242,7 @@ collectors:
   # file_monitor:
   #   enabled: true
   #   cron: "*/10 * * * *"
+  #   persist: true
   #   config:
   #     watch_dir: "/data/incoming"
   #     file_pattern: "*.csv"
@@ -214,6 +251,7 @@ collectors:
   # db_sync:
   #   enabled: false
   #   cron: "0 2 * * *"            # 每天凌晨 2 点
+  #   persist: false               # 同步场景可能不需要入库
   #   config:
   #     source_db: "mysql://..."
   #     target_db: "postgresql://..."

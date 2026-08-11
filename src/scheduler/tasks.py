@@ -23,9 +23,15 @@ def run_collector(collector_name: str) -> dict[str, Any]:
     Returns:
         任务执行结果
     """
+    from src.collector.registry import get_collector_schedule
+
     logger.info(f"[Task] 开始采集: {collector_name}")
     start_time = datetime.now()
     result = {"total": 0, "success": 0, "failed": 0}
+
+    # 获取采集器配置
+    schedule = get_collector_schedule(collector_name)
+    persist = schedule.get("persist", True)  # 默认持久化
 
     try:
         # 1. 采集
@@ -41,15 +47,22 @@ def run_collector(collector_name: str) -> dict[str, Any]:
         validator = Validator()
         records = validator.process(records)
 
-        # 4. 存储
-        storage = MySQLStorage(auto_create=True)
-        saved = storage.save(records)
-        result["success"] = saved
-        result["failed"] = len(records) - saved
+        # 4. 存储（根据配置决定是否入库）
+        if persist:
+            storage = MySQLStorage(auto_create=True)
+            saved = storage.save(records)
+            result["success"] = saved
+            result["failed"] = len(records) - saved
+        else:
+            # 不入库，只统计通过校验的数量
+            result["success"] = len(records)
+            result["failed"] = 0
+            logger.info(f"[Task] {collector_name} 不入库模式，跳过存储")
 
         elapsed = (datetime.now() - start_time).total_seconds()
         logger.info(
-            f"[Task] 采集完成: {collector_name} (采集 {result['total']} 条, 保存 {saved} 条, 耗时 {elapsed:.1f}s)"
+            f"[Task] 采集完成: {collector_name} (采集 {result['total']} 条, "
+            f"{'保存' if persist else '处理'} {result['success']} 条, 耗时 {elapsed:.1f}s)"
         )
         return result
 

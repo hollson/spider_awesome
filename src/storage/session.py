@@ -99,11 +99,19 @@ class Database:
             session.close()
 
 
-# 全局数据库实例
-db = Database()
+# 全局数据库实例（惰性初始化）
+_db_instance: Database | None = None
+
+
+def get_db_instance() -> Database:
+    """获取全局数据库实例（惰性初始化）"""
+    global _db_instance
+    if _db_instance is None:
+        _db_instance = Database()
+    return _db_instance
 
 
 def get_db() -> Generator[Session, None, None]:
     """获取数据库会话生成器"""
-    with db.get_session() as session:
+    with get_db_instance().get_session() as session:
         yield session

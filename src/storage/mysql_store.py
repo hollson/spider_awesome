@@ -14,7 +14,7 @@ from sqlalchemy import func
 from src.common.logger import logger
 from src.storage.base_storage import BaseStorage
 from src.storage.models import BaseRecord, DataRecord
-from src.storage.session import db
+from src.storage.session import get_db_instance
 
 
 class BaseRecordStorage(BaseStorage):
@@ -33,7 +33,7 @@ class BaseRecordStorage(BaseStorage):
             auto_create: 是否自动创建表
         """
         if auto_create:
-            db.create_tables()
+            get_db_instance().create_tables()
 
     def save(self, records: list[dict[str, Any]]) -> int:
         """
@@ -50,7 +50,7 @@ class BaseRecordStorage(BaseStorage):
 
         logger.info(f"[BaseRecordStorage] 开始保存 {len(records)} 条数据")
         saved_count = 0
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             for record in records:
                 try:
                     record_id = record.get("id")
@@ -88,12 +88,12 @@ class BaseRecordStorage(BaseStorage):
 
     def exists(self, record_id: str) -> bool:
         """检查数据是否存在"""
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             return session.query(BaseRecord).filter_by(id=record_id).count() > 0
 
     def count(self, filters: dict[str, Any] | None = None) -> int:
         """统计数据数量"""
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             query = session.query(func.count(BaseRecord.id))
             if filters:
                 if "source" in filters:
@@ -119,7 +119,7 @@ class BaseRecordStorage(BaseStorage):
         Returns:
             数据列表
         """
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             query = session.query(BaseRecord)
 
             if source:
@@ -152,7 +152,7 @@ class MySQLStorage(BaseRecordStorage):
 
         logger.info(f"[MySQLStorage] 开始保存 {len(records)} 条数据")
         saved_count = 0
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             for record in records:
                 try:
                     record_id = record.get("id")
@@ -173,7 +173,6 @@ class MySQLStorage(BaseRecordStorage):
                         collector_name=record.get("collector_name", ""),
                         title=record.get("title"),
                         description=record.get("description"),
-                        url=record.get("url") or record.get("source_url"),
                         raw_data=record.get("raw_data"),
                         extra=record.get("extra"),
                         # 航空业务字段
@@ -196,6 +195,7 @@ class MySQLStorage(BaseRecordStorage):
                         seats=record.get("seats"),
                         thumb=record.get("thumb"),
                         preview=record.get("preview"),
+                        source_url=record.get("url") or record.get("source_url"),
                     )
                     session.add(db_record)
                     saved_count += 1
@@ -230,7 +230,7 @@ class MySQLStorage(BaseRecordStorage):
         Returns:
             数据列表
         """
-        with db.get_session() as session:
+        with get_db_instance().get_session() as session:
             query = session.query(DataRecord)
 
             if source:

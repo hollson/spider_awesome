@@ -1,5 +1,6 @@
 """公共层模块"""
 
+from src.common.color import banner_label, banner_line, banner_title, colored  # 颜色
 from src.common.convert_utils import (  # 类型转换
     format_price,
     safe_json,
@@ -65,6 +66,11 @@ from src.common.utils import (  # 基础工具
 )
 
 __all__ = [
+    # 颜色
+    "colored",
+    "banner_line",
+    "banner_title",
+    "banner_label",
     # 日志
     "logger",
     "setup_logger",

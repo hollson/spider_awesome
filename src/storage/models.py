@@ -4,8 +4,8 @@ SQLAlchemy ORM 数据模型
 
 设计原则：
 - BaseRecord: 公共基础字段，适用于所有类型的爬虫
-- DataRecord: 继承 BaseRecord，包含航空业务特定字段
-- 其他业务可继承 BaseRecord 创建自己的数据模型
+- DataRecord: 航空业务专用表，包含业务特定字段
+- 其他业务可参考 BaseRecord 创建自己的数据模型
 """
 
 from datetime import datetime
@@ -29,10 +29,10 @@ Base = declarative_base()
 
 class BaseRecord(Base):
     """
-    通用数据记录表（基类）
+    通用数据记录表
     包含所有类型爬虫都需要的公共字段
 
-    衍生项目可直接使用此表，或继承扩展
+    衍生项目可直接使用此表，或参考创建自己的数据模型
     """
 
     __tablename__ = "base_records"
@@ -81,9 +81,9 @@ class BaseRecord(Base):
 class DataRecord(Base):
     """
     航空业务数据记录表
+    包含航空业务特定字段
 
-    如果你的项目不是航空业务，可以直接使用 BaseRecord
-    或参考此结构创建自己的数据模型
+    如果你的项目不是航空业务，请直接使用 BaseRecord
     """
 
     __tablename__ = "data_records"
@@ -92,12 +92,13 @@ class DataRecord(Base):
     id = Column(String(64), primary_key=True, comment="数据唯一标识（MD5）")
 
     # 来源信息
-    source = Column(String(50), nullable=False, comment="数据来源")
+    source = Column(String(50), nullable=False, index=True, comment="数据来源")
     collector_name = Column(String(50), nullable=False, comment="采集器名称")
-
-    # 运营信息
     operator_id = Column(String(64), comment="运营商 ID")
+
+    # 核心字段
     title = Column(String(200), comment="标题")
+    description = Column(Text, comment="描述")
     tail_num = Column(String(20), comment="飞机尾号")
     model = Column(String(50), comment="飞机型号")
 
@@ -125,11 +126,15 @@ class DataRecord(Base):
     thumb = Column(String(500), comment="缩略图 URL")
     preview = Column(JSON, comment="预览图列表")
     source_url = Column(String(500), comment="数据源 URL")
+
+    # 扩展字段
     raw_data = Column(JSON, comment="原始数据（JSON）")
+    extra = Column(JSON, comment="扩展字段")
 
     # 状态字段
     is_hot = Column(SmallInteger, default=0, comment="热门等级 (0-3)")
     sale_status = Column(SmallInteger, default=0, comment="销售状态")
+    status = Column(SmallInteger, default=0, comment="数据状态 (0:正常, 1:删除)")
 
     # 时间戳
     create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
@@ -149,6 +154,7 @@ class DataRecord(Base):
             "collector_name": self.collector_name,
             "operator_id": self.operator_id,
             "title": self.title,
+            "description": self.description,
             "tail_num": self.tail_num,
             "model": self.model,
             "origin_code": self.origin_code,
@@ -161,8 +167,10 @@ class DataRecord(Base):
             "cost_minutes": self.cost_minutes,
             "flight_cost": self.flight_cost,
             "currency": self.currency,
+            "currency_symbol": self.currency_symbol,
             "seats": self.seats,
             "thumb": self.thumb,
+            "source_url": self.source_url,
             "create_time": self.create_time.isoformat() if self.create_time else None,
         }
 

@@ -97,7 +97,7 @@ class Validator(BaseProcessor):
             try:
                 # 校验数据
                 validated = DataRecordSchema(**record)
-                valid_records.append(validated.dict())
+                valid_records.append(validated.model_dump())
             except ValidationError as e:
                 invalid_records.append((record.get("id"), str(e)))
                 logger.warning(f"[Validator] 数据校验失败: {record.get('id')} - {e}")

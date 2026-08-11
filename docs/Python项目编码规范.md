@@ -13,7 +13,7 @@
 ### 2.1 缩进与换行
 
 - 缩进：统一使用 **4 个空格**，禁止使用 Tab（编辑器需配置"Tab 自动转为 4 空格"）；
-- 行长度：单行代码不超过 88 个字符（PEP 8 推荐），注释/文档字符串不超过 72 个字符；
+- 行长度：单行代码不超过 120 个字符（项目 Ruff 配置），注释/文档字符串不超过 80 个字符；
 - 换行原则：
     - 二元运算符后换行（如 +、=、and/or）；
     - 函数/类参数列表过长时，换行后缩进 4 空格，末尾括号单独换行；
@@ -43,7 +43,7 @@
 - 切片语法空格：`arr[1:5]`（正确），`arr[1 : 5]`（错误）。
 
 ```python
-# 正确
+# ✅ 正确 — 运算符两侧有空格
 total = num1 + num2 * (num3 - num4)
 
 
@@ -51,11 +51,11 @@ def func(a: int, b: str = "default") -> None:
     pass
 
 
-# 错误
-total = num1 + num2 * (num3 - num4)
+# ❌ 错误 — 运算符两侧缺少空格
+total = num1+num2*(num3-num4)
 
 
-def func(a: int, b: str = "default") -> None:
+def func(a:int, b:str="default") -> None:
     pass
 ```
 
@@ -246,17 +246,25 @@ def get_value(key: str) -> str | None:
     return cache.get(key)
 ```
 
-- None 与联合类型：避免在需要具体类型的地方混入 `None`。如果字段可为空，用空字符串 `""` 替代；
+- None 与联合类型：明确区分 `None` 和空值的语义，根据场景选择：
+    - 数据库字段：`NULL` 用 `None`，空值用 `""` 或 `0`
+    - API 响应：缺失字段用 `None`，空值保持原类型
+    - 函数返回值：无结果用 `None`，空结果用空容器（`[]`/`{}`）
 
 ```python
-# ❌ 错误 — None 与 dict 值类型不兼容
-row["expires_at"] = some_date.isoformat() if condition else None
+# 场景1：数据库字段 — 根据业务语义选择
+row["expires_at"] = some_date.isoformat() if condition else None  # NULL 表示未设置
+row["description"] = description if description else ""           # 空字符串表示无描述
 
-# ✅ 正确 — 用空字符串表示缺失
-row["expires_at"] = some_date.isoformat() if condition else ""
+# 场景2：函数返回值 — 无结果用 None，空结果用空容器
+def find_user(user_id: int) -> dict | None:
+    """未找到返回 None"""
+    return user_cache.get(user_id)
+
+def get_tags(item_id: int) -> list[str]:
+    """无标签返回空列表"""
+    return item_tags.get(item_id, [])
 ```
-
-> 此规则在数据库写值场景中尤其重要：空字符串比 `None` 更易于跨语言/跨库互操作。
 
 #### 3.3.5 无类型第三方库
 
@@ -304,7 +312,7 @@ data = json.loads(raw)  # type: ignore
     - 多条件判断优先用 `if/elif/else`，避免多层嵌套（超过 3 层需拆分函数）；
 - 循环语句：
     - 优先使用列表推导/生成器表达式替代简单循环（如 `[x*2 for x in lst if x > 0]`）；
-    - 禁止无限循环（`while True`）无退出条件，循环内及时 `break`；
+    - 避免无退出条件的无限循环（`while True`），常驻服务场景（如调度器、服务器）可使用 `while True`，需添加 `KeyboardInterrupt` 捕获以支持优雅退出；
 - 异常处理：
     - 精准捕获异常（如 `except ValueError` 而非 `except Exception`）；
     - `try/except` 仅包裹必要代码，避免"大 try 块"；
