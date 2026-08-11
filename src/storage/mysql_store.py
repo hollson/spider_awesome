@@ -46,6 +46,7 @@ class MySQLStorage(BaseStorage):
         if not records:
             return 0
 
+        logger.info(f"[MySQLStorage] 开始保存 {len(records)} 条数据")
         saved_count = 0
         with db.get_session() as session:
             for record in records:

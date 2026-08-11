@@ -38,6 +38,7 @@ class Database:
         """
         self.url = url or settings.DATABASE_URL
         self.db_type = self._detect_db_type(self.url)
+        logger.info(f"[Database] 初始化 {self.db_type} 连接")
 
         # 根据数据库类型配置不同的参数
         if self.db_type == "sqlite":

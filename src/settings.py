@@ -45,7 +45,8 @@ class Settings:
 
     # ========== 日志 ==========
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    LOG_DIR: str = os.getenv("LOG_DIR", "var/logs")
+    LOG_FILE: str = os.getenv("LOG_FILE", "var/logs/spider_awesome.log")
+    LOG_RETENTION: int = int(os.getenv("LOG_RETENTION", "7"))
 
     # ========== 调度 ==========
     SCHEDULER_ENABLED: bool = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"

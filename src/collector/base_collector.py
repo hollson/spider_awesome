@@ -136,7 +136,8 @@ class BaseCollector(ABC):
             if cached is not None:
                 return cached
 
-        logger.info(f"[{self.name}] 从 HTTP 读取")
+        logger.info(f"[{self.name}] 开始 HTTP 请求...")
         content = fetch_func()
+        logger.info(f"[{self.name}] HTTP 请求完成，内容长度: {len(content)} 字符")
         self.write_cache(cache_filename, content)
         return content

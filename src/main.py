@@ -215,4 +215,10 @@ def main():
 
 
 if __name__ == "__main__":
+    logger.info("=" * 50)
+    logger.info(f"启动 {settings.APP_NAME} v{settings.APP_VERSION}")
+    logger.info(f"环境: {settings.ENV_MODE} | 调试: {settings.DEBUG}")
+    logger.info(f"数据库: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else 'SQLite'}")
+    logger.info(f"日志级别: {settings.LOG_LEVEL}")
+    logger.info("=" * 50)
     main()

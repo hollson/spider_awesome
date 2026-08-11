@@ -1,82 +1,93 @@
 """
 全局日志模块
-支持控制台 + 文件双输出，按日期自动切割
+基于 Loguru，支持控制台彩色输出 + 文件按天轮转
 """
 
 import logging
 import sys
-from datetime import datetime
-from logging.handlers import RotatingFileHandler
-from pathlib import Path
+
+from loguru import logger
 
 from src.settings import settings
 
-
-class ColorFormatter(logging.Formatter):
-    """带颜色的日志格式化器（控制台使用）"""
-
-    COLORS = {
-        logging.DEBUG: "\033[36m",  # Cyan
-        logging.INFO: "\033[32m",  # Green
-        logging.WARNING: "\033[33m",  # Yellow
-        logging.ERROR: "\033[31m",  # Red
-        logging.CRITICAL: "\033[35m",  # Magenta
-    }
-    RESET = "\033[0m"
-
-    def format(self, record):
-        color = self.COLORS.get(record.levelno, "")
-        record.levelname = f"{color}{record.levelname:<8}{self.RESET}"
-        return super().format(record)
+# 日志级别缩写
+_LEVEL_ABBR = {
+    "DEBUG": "DBG",
+    "INFO": "INF",
+    "WARNING": "WRN",
+    "ERROR": "ERR",
+    "CRITICAL": "CRT",
+}
 
 
-def setup_logger(name: str = "data_collector", level: str = None, log_dir: str = None) -> logging.Logger:
+def setup_logger() -> None:
     """
-    配置并返回日志记录器
+    初始化 Loguru 日志系统
 
-    Args:
-        name: 日志记录器名称
-        level: 日志级别
-        log_dir: 日志文件目录
-
-    Returns:
-        配置好的日志记录器
+    - 控制台：彩色输出到 stderr
+    - 文件：按天轮转，自动保留指定天数
+    - 拦截 stdlib logging：统一汇入 Loguru
     """
-    logger = logging.getLogger(name)
+    # 1) 移除 Loguru 默认 handler
+    logger.remove()
 
-    # 防止重复添加 handler
-    if logger.handlers:
-        return logger
-
-    level = level or settings.LOG_LEVEL
-    log_dir = log_dir or settings.LOG_DIR
-    logger.setLevel(getattr(logging, level.upper(), logging.INFO))
-
-    # 日志格式
-    console_fmt = "%(asctime)s [%(levelname)s] %(message)s"
-    file_fmt = "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
-    date_fmt = "%Y-%m-%d %H:%M:%S"
-
-    # 控制台输出
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(ColorFormatter(console_fmt, date_fmt))
-    logger.addHandler(console_handler)
-
-    # 文件输出（按大小切割，保留 5 个备份）
-    log_path = Path(log_dir)
-    log_path.mkdir(parents=True, exist_ok=True)
-    today = datetime.now().strftime("%Y-%m-%d")
-    file_handler = RotatingFileHandler(
-        log_path / f"{name}_{today}.log",
-        maxBytes=10 * 1024 * 1024,  # 10MB
-        backupCount=5,
-        encoding="utf-8",
+    # 2) 控制台输出 — 彩色格式
+    logger.add(
+        sys.stderr,
+        level=settings.LOG_LEVEL,
+        format=(
+            "<green>{time:MM-DD HH:mm:ss}</green> "
+            "<level>{extra[level_abbr]}</level> "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> "
+            "<level>{message}</level>"
+        ),
+        colorize=True,
     )
-    file_handler.setFormatter(logging.Formatter(file_fmt, date_fmt))
-    logger.addHandler(file_handler)
 
-    return logger
+    # 3) 文件输出 — 按天轮转，保留指定天数
+    if settings.LOG_FILE:
+        import os
+
+        log_dir = os.path.dirname(settings.LOG_FILE)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+
+        logger.add(
+            settings.LOG_FILE,
+            level=settings.LOG_LEVEL,
+            format=("{time:YYYY-MM-DD HH:mm:ss.SSS} {extra[level_abbr]} {name}:{function}:{line} {message}"),
+            rotation="00:00",  # 每天午夜轮转
+            retention=f"{settings.LOG_RETENTION} days",
+            encoding="utf-8",
+        )
+
+    # 4) patcher 动态注入级别缩写
+    logger.configure(
+        patcher=lambda record: record["extra"].update(
+            level_abbr=_LEVEL_ABBR.get(record["level"].name, record["level"].name[:3])
+        )
+    )
+
+    # 5) 拦截 stdlib logging → Loguru
+    class InterceptHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            try:
+                level = logger.level(record.levelname).name
+            except ValueError:
+                level = record.levelno
+            frame = logging.currentframe()
+            depth = 2
+            while frame and frame.f_code.co_filename == logging.__file__:
+                frame = frame.f_back
+                depth += 1
+            logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+    logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
 
-# 全局日志实例
-logger = setup_logger()
+# 初始化日志（导入即执行）
+setup_logger()
+
+
+# 便捷导出，兼容原有使用方式
+__all__ = ["logger", "setup_logger"]
