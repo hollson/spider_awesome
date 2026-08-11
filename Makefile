@@ -126,6 +126,15 @@ lint:
 	@echo "✅ 检查完成"
 
 
+#HELP bandit@安全扫描
+.PHONY: bandit
+bandit:
+	$(call install_tool,bandit)
+	@echo "🔒 安全漏洞扫描..."
+	@uv tool run bandit -r src/ -f screen
+	@echo "✅ 安全扫描完成"
+
+
 #HELP clean@清理项目
 .PHONY: clean
 clean:

@@ -2,6 +2,7 @@
 通用工具函数
 时间转换、MD5 生成、文件操作等
 """
+
 import hashlib
 import json
 import re
@@ -49,7 +50,7 @@ def generate_id(*fields) -> str:
         MD5 哈希值
     """
     data = json.dumps(fields, sort_keys=True, default=str)
-    return hashlib.md5(data.encode()).hexdigest()
+    return hashlib.md5(data.encode(), usedforsecurity=False).hexdigest()
 
 
 def parse_datetime(

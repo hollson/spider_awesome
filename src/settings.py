@@ -2,6 +2,7 @@
 全局配置模块
 集中管理所有配置项，封装类型转换与派生属性
 """
+
 import os
 
 
@@ -15,7 +16,7 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
 
     # ========== 服务器 ==========
-    SERVER_HOST: str = os.getenv("SERVER_HOST", "0.0.0.0")
+    SERVER_HOST: str = os.getenv("SERVER_HOST", "0.0.0.0")  # nosec B104
     SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8000"))
 
     # ========== 数据库 ==========
@@ -59,7 +60,7 @@ class Settings:
     COLLECTOR_CRON_MINUTE: int = int(os.getenv("COLLECTOR_CRON_MINUTE", "0"))
 
     @property
-    def COLLECTOR_CRON(self) -> dict[str, dict]:
+    def COLLECTOR_CRON(self) -> dict[str, dict]:  # noqa: N802
         """
         获取采集器调度配置
 
@@ -74,14 +75,18 @@ class Settings:
 
         cron_config = {}
         for name in list_collectors():
-            hour = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_HOUR", str(self.COLLECTOR_CRON_HOUR)))
-            minute = int(os.getenv(f"COLLECTOR_CRON_{name.upper()}_MINUTE", str(self.COLLECTOR_CRON_MINUTE)))
+            hour = int(
+                os.getenv(f"COLLECTOR_CRON_{name.upper()}_HOUR", str(self.COLLECTOR_CRON_HOUR))
+            )
+            minute = int(
+                os.getenv(f"COLLECTOR_CRON_{name.upper()}_MINUTE", str(self.COLLECTOR_CRON_MINUTE))
+            )
             cron_config[name] = {"hour": hour, "minute": minute}
 
         return cron_config
 
     @property
-    def PROXIES(self) -> dict | None:
+    def PROXIES(self) -> dict | None:  # noqa: N802
         """代理配置"""
         if self.HTTP_PROXY or self.HTTPS_PROXY:
             proxies = {}

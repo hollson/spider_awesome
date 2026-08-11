@@ -2,6 +2,7 @@
 模拟采集器：用于测试并行任务执行
 通过 sleep 模拟耗时的网络请求
 """
+
 import time
 from typing import Any
 
@@ -23,8 +24,18 @@ class ExampleSlowCollector(BaseCollector):
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")
         return [
-            {"id": "slow_1", "source": self.name, "collector_name": self.name, "title": "慢速数据1"},
-            {"id": "slow_2", "source": self.name, "collector_name": self.name, "title": "慢速数据2"},
+            {
+                "id": "slow_1",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "慢速数据1",
+            },
+            {
+                "id": "slow_2",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "慢速数据2",
+            },
         ]
 
 
@@ -42,7 +53,12 @@ class ExampleMediumCollector(BaseCollector):
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")
         return [
-            {"id": "medium_1", "source": self.name, "collector_name": self.name, "title": "中速数据1"},
+            {
+                "id": "medium_1",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "中速数据1",
+            },
         ]
 
 
@@ -60,7 +76,22 @@ class ExampleFastCollector(BaseCollector):
         time.sleep(self.SLEEP_SECONDS)
         logger.info(f"[{self.name}] 采集完成")
         return [
-            {"id": "fast_1", "source": self.name, "collector_name": self.name, "title": "快速数据1"},
-            {"id": "fast_2", "source": self.name, "collector_name": self.name, "title": "快速数据2"},
-            {"id": "fast_3", "source": self.name, "collector_name": self.name, "title": "快速数据3"},
+            {
+                "id": "fast_1",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "快速数据1",
+            },
+            {
+                "id": "fast_2",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "快速数据2",
+            },
+            {
+                "id": "fast_3",
+                "source": self.name,
+                "collector_name": self.name,
+                "title": "快速数据3",
+            },
         ]

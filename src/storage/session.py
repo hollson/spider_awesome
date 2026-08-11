@@ -2,6 +2,7 @@
 SQLAlchemy 数据库会话管理
 支持 SQLite、PostgreSQL、MySQL
 """
+
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -49,6 +50,7 @@ class Database:
                 echo=False,
                 connect_args={"check_same_thread": False},
             )
+
             # SQLite 启用外键支持
             @event.listens_for(self.engine, "connect")
             def set_sqlite_pragma(dbapi_connection, connection_record):

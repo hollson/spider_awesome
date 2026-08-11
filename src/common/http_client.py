@@ -2,6 +2,7 @@
 统一 HTTP 客户端封装
 支持重试、代理、超时、指数退避
 """
+
 import time
 from typing import Any
 
@@ -53,11 +54,13 @@ class HttpClient:
             self.session.proxies.update(settings.PROXIES)
 
         # 默认请求头
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Accept": "application/json, text/html, */*",
-            "Accept-Language": "en-US,en;q=0.9",
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept": "application/json, text/html, */*",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+        )
 
     def request(
         self,

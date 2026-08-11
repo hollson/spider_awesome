@@ -2,6 +2,7 @@
 数据采集模板项目 - 主入口
 支持多种运行模式：采集、调度
 """
+
 import argparse
 import sys
 from pathlib import Path
@@ -120,6 +121,7 @@ def cmd_scheduler(args):
     try:
         while True:
             import time
+
             time.sleep(1)
     except KeyboardInterrupt:
         task_manager.stop()
@@ -148,9 +150,11 @@ def cmd_status(args):
     print("\n任务执行状态:")
     print("-" * 60)
     for record in status:
-        print(f"  {record['task_id']}: {record['status']} "
-              f"(耗时 {record['duration']}s, "
-              f"成功 {record['success_count']}/{record['total_count']})")
+        print(
+            f"  {record['task_id']}: {record['status']} "
+            f"(耗时 {record['duration']}s, "
+            f"成功 {record['success_count']}/{record['total_count']})"
+        )
 
 
 def main():

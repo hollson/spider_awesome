@@ -2,6 +2,7 @@
 并行任务执行测试
 验证 run_parallel_collectors 是否真正并行执行
 """
+
 import time
 from unittest.mock import patch, MagicMock
 
@@ -61,8 +62,7 @@ class TestParallelExecution:
 
         # 并行耗时应接近最慢的采集器（2s），而非总和（3.5s）
         assert elapsed < serial_estimated - 0.5, (
-            f"并行执行耗时 {elapsed:.2f}s，接近串行 {serial_estimated}s，"
-            f"说明并行未生效"
+            f"并行执行耗时 {elapsed:.2f}s，接近串行 {serial_estimated}s，说明并行未生效"
         )
 
         # 验证所有采集器都执行了

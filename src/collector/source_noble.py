@@ -2,6 +2,7 @@
 示例采集器3: Noble
 演示 GET JSON API 采集方式
 """
+
 import json
 import re
 from typing import Any

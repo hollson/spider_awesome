@@ -2,6 +2,7 @@
 全局日志模块
 支持控制台 + 文件双输出，按日期自动切割
 """
+
 import logging
 import sys
 from datetime import datetime
@@ -15,10 +16,10 @@ class ColorFormatter(logging.Formatter):
     """带颜色的日志格式化器（控制台使用）"""
 
     COLORS = {
-        logging.DEBUG: "\033[36m",     # Cyan
-        logging.INFO: "\033[32m",      # Green
-        logging.WARNING: "\033[33m",   # Yellow
-        logging.ERROR: "\033[31m",     # Red
+        logging.DEBUG: "\033[36m",  # Cyan
+        logging.INFO: "\033[32m",  # Green
+        logging.WARNING: "\033[33m",  # Yellow
+        logging.ERROR: "\033[31m",  # Red
         logging.CRITICAL: "\033[35m",  # Magenta
     }
     RESET = "\033[0m"
@@ -30,9 +31,7 @@ class ColorFormatter(logging.Formatter):
 
 
 def setup_logger(
-    name: str = "data_collector",
-    level: str = None,
-    log_dir: str = None
+    name: str = "data_collector", level: str = None, log_dir: str = None
 ) -> logging.Logger:
     """
     配置并返回日志记录器
@@ -73,7 +72,7 @@ def setup_logger(
         log_path / f"{name}_{today}.log",
         maxBytes=10 * 1024 * 1024,  # 10MB
         backupCount=5,
-        encoding="utf-8"
+        encoding="utf-8",
     )
     file_handler.setFormatter(logging.Formatter(file_fmt, date_fmt))
     logger.addHandler(file_handler)

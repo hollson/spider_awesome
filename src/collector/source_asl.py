@@ -2,6 +2,7 @@
 示例采集器2: ASL
 演示 HTML 分页采集方式
 """
+
 import re
 from datetime import datetime
 from pathlib import Path
@@ -229,6 +230,8 @@ def collect() -> list[dict[str, Any]]:
 
 
 if __name__ == "__main__":
+    import json
+
     records = collect()
     for record in records[:3]:
         print(json.dumps(record, indent=2, default=str))

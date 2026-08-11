@@ -2,6 +2,7 @@
 HTML 处理工具模块
 提供 HTML 压缩、DOM 提取等通用功能
 """
+
 import re
 
 
@@ -39,7 +40,7 @@ def extract_body(html: str) -> str:
     start = html.find("<body")
     end = html.find("</body>")
     if start != -1 and end != -1:
-        return html[start:end + len("</body>")]
+        return html[start : end + len("</body>")]
     return html
 
 

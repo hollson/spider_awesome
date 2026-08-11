@@ -2,6 +2,7 @@
 示例采集器1: Alerion
 演示 POST JSON API 采集方式
 """
+
 import json
 from typing import Any
 
@@ -128,7 +129,9 @@ class AlerionCollector(BaseCollector):
             "start_time": start_time,
             "end_time": end_time,
             "take_off_time": take_off_time,
-            "cost_minutes": int(flight["flightTimeDec"] * 60) if flight.get("flightTimeDec") else None,
+            "cost_minutes": int(flight["flightTimeDec"] * 60)
+            if flight.get("flightTimeDec")
+            else None,
             "flight_cost": flight.get("acPrice"),
             "currency": ac.get("currency", ""),
             "currency_symbol": "$",

@@ -2,6 +2,7 @@
 调度层模块
 使用 APScheduler 实现定时采集任务，支持并发控制、失败重试、状态管理
 """
+
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -14,6 +15,7 @@ from src.common.logger import logger
 
 class TaskStatus(Enum):
     """任务状态枚举"""
+
     PENDING = "pending"
     RUNNING = "running"
     SUCCESS = "success"
@@ -95,6 +97,7 @@ class TaskManager:
         if self._scheduler is None:
             try:
                 from apscheduler.schedulers.background import BackgroundScheduler
+
                 self._scheduler = BackgroundScheduler()
             except ImportError:
                 logger.error("APScheduler 未安装，请执行: uv add apscheduler")
@@ -105,8 +108,7 @@ class TaskManager:
         """获取线程池执行器"""
         if self._executor is None:
             self._executor = ThreadPoolExecutor(
-                max_workers=self.max_workers,
-                thread_name_prefix="collector"
+                max_workers=self.max_workers, thread_name_prefix="collector"
             )
         return self._executor
 
@@ -178,8 +180,10 @@ class TaskManager:
 
     def _wrap_task(self, task_id: str, func: Callable) -> Callable:
         """包装任务函数，添加并发控制和状态管理"""
+
         def wrapper():
             self._run_task_with_retry(task_id, func)
+
         return wrapper
 
     def _run_task_with_retry(self, task_id: str, func: Callable):
@@ -235,8 +239,7 @@ class TaskManager:
                     record.end_time = datetime.now()
                     record.duration = (record.end_time - record.start_time).total_seconds()
                     logger.error(
-                        f"[Scheduler] 任务 {task_id} 最终失败 "
-                        f"(已重试 {self.retry_count} 次)"
+                        f"[Scheduler] 任务 {task_id} 最终失败 (已重试 {self.retry_count} 次)"
                     )
 
     def submit_task(self, task_id: str, func: Callable) -> str:

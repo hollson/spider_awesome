@@ -2,6 +2,7 @@
 存储层抽象基类
 定义数据持久化存储的统一接口
 """
+
 from abc import ABC, abstractmethod
 from typing import Any
 

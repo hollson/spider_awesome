@@ -2,6 +2,7 @@
 数据清洗模块
 去重、空值处理、脏数据过滤
 """
+
 from typing import Any
 
 from src.common.logger import logger
@@ -52,7 +53,9 @@ class Cleaner(BaseProcessor):
         # 3. 清理字符串字段
         records = self._clean_strings(records)
 
-        logger.info(f"[Cleaner] 清洗完成，保留 {len(records)} 条数据 (过滤 {initial_count - len(records)} 条)")
+        logger.info(
+            f"[Cleaner] 清洗完成，保留 {len(records)} 条数据 (过滤 {initial_count - len(records)} 条)"
+        )
         return records
 
     def _deduplicate(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:

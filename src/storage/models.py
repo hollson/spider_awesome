@@ -2,6 +2,7 @@
 SQLAlchemy ORM 数据模型
 定义所有数据表结构
 """
+
 from datetime import datetime
 
 from sqlalchemy import (
@@ -25,6 +26,7 @@ class DataRecord(Base):
     通用数据记录表
     用于存储采集到的各类数据
     """
+
     __tablename__ = "data_records"
 
     id = Column(String(64), primary_key=True, comment="数据唯一标识（MD5）")
@@ -74,7 +76,9 @@ class DataRecord(Base):
 
     # 时间戳
     create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    update_time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    update_time = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间"
+    )
 
     # 索引
     __table_args__ = (
@@ -110,6 +114,7 @@ class DataRecord(Base):
 
 class CollectorTask(Base):
     """采集任务记录表"""
+
     __tablename__ = "collector_tasks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

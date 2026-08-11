@@ -2,6 +2,7 @@
 MySQL 存储实现
 使用 SQLAlchemy 进行数据持久化
 """
+
 from typing import Any
 
 from sqlalchemy import func
@@ -146,5 +147,7 @@ class MySQLStorage(BaseStorage):
             if dest_code:
                 query = query.filter(DataRecord.dest_code == dest_code)
 
-            records = query.order_by(DataRecord.create_time.desc()).offset(offset).limit(limit).all()
+            records = (
+                query.order_by(DataRecord.create_time.desc()).offset(offset).limit(limit).all()
+            )
             return [r.to_dict() for r in records]

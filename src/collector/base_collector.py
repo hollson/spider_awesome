@@ -2,6 +2,7 @@
 采集器抽象基类
 定义所有采集器必须实现的统一接口
 """
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any

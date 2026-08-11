@@ -2,10 +2,11 @@
 数据校验模块
 使用 Pydantic 进行数据结构校验
 """
+
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from src.common.logger import logger
 from src.processor.base_processor import BaseProcessor
@@ -13,6 +14,7 @@ from src.processor.base_processor import BaseProcessor
 
 class DataRecordSchema(BaseModel):
     """数据记录校验模型"""
+
     id: str = Field(..., description="数据唯一标识")
     source: str = Field(..., description="数据来源")
     collector_name: str = Field(..., description="采集器名称")
@@ -43,20 +45,24 @@ class DataRecordSchema(BaseModel):
 
     raw_data: dict | None = None
 
-    @validator("seats", pre=True)
+    @field_validator("seats", mode="before")
+    @classmethod
     def parse_seats(cls, v):
         """座位数转换"""
         if isinstance(v, str):
             import re
+
             match = re.search(r"\d+", v)
             return int(match.group()) if match else None
         return v
 
-    @validator("cost_minutes", pre=True)
+    @field_validator("cost_minutes", mode="before")
+    @classmethod
     def parse_cost_minutes(cls, v):
         """飞行时长转换"""
         if isinstance(v, str):
             from src.common.utils import cost_minutes
+
             return cost_minutes(v)
         return v
 
@@ -98,9 +104,7 @@ class Validator(BaseProcessor):
                 logger.warning(f"[Validator] 数据校验失败: {record.get('id')} - {e}")
 
         if invalid_records:
-            logger.warning(
-                f"[Validator] {len(invalid_records)} 条数据校验失败"
-            )
+            logger.warning(f"[Validator] {len(invalid_records)} 条数据校验失败")
 
         logger.info(
             f"[Validator] 校验完成: {len(valid_records)} 通过, "
