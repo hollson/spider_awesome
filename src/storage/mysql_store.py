@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import func
 
 from src.common.logger import logger
-from src.db.models import Base, DataRecord
-from src.db.session import db
+from src.storage.models import Base, DataRecord
+from src.storage.session import db
 from src.storage.base_storage import BaseStorage
 
 

@@ -76,7 +76,10 @@ $ spider-awesome/
 │   │   ├── cleaner.py         #  数据清洗（去重/空值过滤）
 │   │   └── validator.py       #  数据校验（Pydantic）
 │   ├── storage/               # 【存储层】持久化
-│   │   └── mysql_store.py     #  多数据库存储（SQLite/PG/MySQL）
+│   │   ├── base_storage.py    #  存储抽象基类
+│   │   ├── mysql_store.py     #  多数据库存储（SQLite/PG/MySQL）
+│   │   ├── models.py          #  ORM 模型（SQLAlchemy）
+│   │   └── session.py         #  数据库会话管理
 │   ├── scheduler/             # 【调度层】定时任务
 │   │   ├── task_manager.py    #  任务管理器（并发控制、失败重试）
 │   │   └── tasks.py           #  任务定义
@@ -84,7 +87,6 @@ $ spider-awesome/
 │   │   ├── logger.py          #  日志（Loguru）
 │   │   ├── http_client.py     #  HTTP 客户端
 │   │   └── utils.py           #  工具函数
-│   ├── db/                    #  ORM（SQLAlchemy）
 │   ├── env_loader.py          #  环境配置加载器
 │   ├── settings.py            #  配置类
 │   └── main.py                #  主入口

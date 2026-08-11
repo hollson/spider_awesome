@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from src.settings import settings
 from src.common.logger import logger
-from src.db.models import Base
+from src.storage.models import Base
 
 
 class Database:
