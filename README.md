@@ -9,6 +9,8 @@
 <a href="README.md">English</a> | <a href="README.md">中文</a>
 </div>
 
+<br/>
+
 ## 📋 概述
 
 - 🕷️ **分层解耦**：采集 / 处理 / 存储 / 调度四层独立，职责清晰
@@ -18,6 +20,10 @@
 - 📡 **采集器自动发现**：`source_*.py` 自动注册，YAML 配置启停
 - 🌍 **环境隔离**：dev/test/prod 三套配置，通过 `ENV_MODE` 零代码切换
 - 🛠️ **生产级工具链**：UV 依赖管理，Ruff 代码质量，Hatchling 构建
+
+
+<br/>
+
 
 ## 🏗️ 架构设计
 

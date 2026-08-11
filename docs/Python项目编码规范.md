@@ -1,5 +1,7 @@
 # Python 编码规范
 
+> 📌 **通用规范**，与项目无直接关联，勿随意改动项目配置。
+
 [TOC]
 
 ## 一、📄 文档说明
@@ -449,3 +451,9 @@ def test_get_user_info():
 
 - 特殊场景需偏离本规范时，需经团队核心成员评审通过；
 - 偏离部分需在代码/文档中注明原因，且仅局限于特定场景，不扩散。
+
+<br/>
+
+---
+
+> 📖 **参考来源**：本文档改编自 [fastapi_awesome 项目编码规范](https://gitee.com/hollson/fastapi_awesome/tree/master/docs)，根据项目实际情况进行了调整。

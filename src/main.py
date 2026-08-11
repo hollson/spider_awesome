@@ -137,24 +137,58 @@ def cmd_scheduler(args):
         logger.info("调度器已停止")
 
 
+def _cron_to_chinese(cron: str) -> str:
+    """将 cron 表达式转为中文说明"""
+    parts = cron.strip().split()
+    if len(parts) < 5:
+        return cron
+
+    minute, hour, day, month, weekday = parts
+
+    # 每 N 分钟
+    if minute.startswith("*/") and hour == "*":
+        return f"每 {minute[2:]} 分钟"
+
+    # 每 N 小时（整点）
+    if minute == "0" and hour.startswith("*/"):
+        return f"每 {hour[2:]} 小时"
+
+    # 固定时间
+    if minute.isdigit() and hour.isdigit() and day == "*" and month == "*":
+        if weekday == "*":
+            return f"每天 {hour}:{minute.zfill(2)}"
+        weekday_map = {"0": "日", "1": "一", "2": "二", "3": "三", "4": "四", "5": "五", "6": "六"}
+        if "-" in weekday:
+            w_parts = weekday.split("-")
+            w1 = weekday_map.get(w_parts[0], w_parts[0])
+            w2 = weekday_map.get(w_parts[1], w_parts[1])
+            return f"周{w1}-{w2} {hour}:{minute.zfill(2)}"
+        w = weekday_map.get(weekday, weekday)
+        return f"每周{w} {hour}:{minute.zfill(2)}"
+
+    return cron
+
+
 def cmd_list(args):
     """列出所有采集器"""
     from src.collector import get_collector_config
+    from src.collector.registry import get_collector_schedule
 
     collectors = list_collectors()
     enabled = list_enabled_collectors()
     config = get_collector_config()
 
     print("\n可用的采集器:")
-    print("-" * 60)
-    print(f"  {'名称':<15} {'状态':<10} {'调度时间':<20}")
-    print("-" * 60)
+    print("-" * 65)
+    print(f"  {'名称':<15} {'状态':<10} {'调度':<20} {'说明'}")
+    print("-" * 65)
 
     for name in collectors:
         status = "✅ 启用" if name in enabled else "❌ 禁用"
-        collector_config = config.get("collectors", {}).get(name, {})
-        cron = collector_config.get("cron", "默认")
-        print(f"  {name:<15} {status:<10} {cron:<20}")
+        schedule = get_collector_schedule(name)
+        cron = schedule.get("cron", "未知")
+        desc = _cron_to_chinese(cron)
+        print(f"  {name:<15} {status:<10} {cron:<20} {desc}")
 
     print()
 
