@@ -3,10 +3,11 @@
 使用 Pydantic 进行数据结构校验
 """
 
+import re
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from src.common.logger import logger
 from src.processor.base_processor import BaseProcessor
@@ -47,18 +48,16 @@ class DataRecordSchema(BaseModel):
 
     @field_validator("seats", mode="before")
     @classmethod
-    def parse_seats(cls, v):
+    def parse_seats(cls, v: Any) -> int | None:
         """座位数转换"""
         if isinstance(v, str):
-            import re
-
             match = re.search(r"\d+", v)
             return int(match.group()) if match else None
         return v
 
     @field_validator("cost_minutes", mode="before")
     @classmethod
-    def parse_cost_minutes(cls, v):
+    def parse_cost_minutes(cls, v: Any) -> int | None:
         """飞行时长转换"""
         if isinstance(v, str):
             from src.common.utils import cost_minutes
@@ -99,7 +98,7 @@ class Validator(BaseProcessor):
                 # 校验数据
                 validated = DataRecordSchema(**record)
                 valid_records.append(validated.dict())
-            except Exception as e:
+            except ValidationError as e:
                 invalid_records.append((record.get("id"), str(e)))
                 logger.warning(f"[Validator] 数据校验失败: {record.get('id')} - {e}")
 

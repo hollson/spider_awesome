@@ -13,7 +13,7 @@ from src.common.logger import logger
 class ExampleSlowCollector(BaseCollector):
     """慢速采集器（模拟 2s 延迟）"""
 
-    SLEEP_SECONDS = 2
+    SLEEP_SECONDS: float = 2
 
     @property
     def name(self) -> str:
@@ -42,7 +42,7 @@ class ExampleSlowCollector(BaseCollector):
 class ExampleMediumCollector(BaseCollector):
     """中速采集器（模拟 1s 延迟）"""
 
-    SLEEP_SECONDS = 1
+    SLEEP_SECONDS: float = 1
 
     @property
     def name(self) -> str:
@@ -65,7 +65,7 @@ class ExampleMediumCollector(BaseCollector):
 class ExampleFastCollector(BaseCollector):
     """快速采集器（模拟 0.5s 延迟）"""
 
-    SLEEP_SECONDS = 0.5
+    SLEEP_SECONDS: float = 0.5
 
     @property
     def name(self) -> str:

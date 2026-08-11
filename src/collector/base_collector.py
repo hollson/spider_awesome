@@ -4,6 +4,7 @@
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -21,8 +22,10 @@ class BaseCollector(ABC):
     - fetch(): 执行采集并返回数据列表
     """
 
-    def __init__(self):
-        self._http_client: HttpClient | None = None
+    _http_client: HttpClient | None
+
+    def __init__(self) -> None:
+        self._http_client = None
 
     @property
     def name(self) -> str:
@@ -46,16 +49,16 @@ class BaseCollector(ABC):
         """
         raise NotImplementedError
 
-    def close(self):
+    def close(self) -> None:
         """释放资源"""
         if self._http_client:
             self._http_client.close()
             self._http_client = None
 
-    def __enter__(self):
+    def __enter__(self) -> "BaseCollector":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> None:
         self.close()
 
     def generate_record_id(self, *fields) -> str:
@@ -117,7 +120,7 @@ class BaseCollector(ABC):
     def fetch_with_cache(
         self,
         cache_filename: str,
-        fetch_func,
+        fetch_func: Callable[[], str],
         force_refresh: bool = False,
     ) -> str:
         """

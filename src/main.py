@@ -5,6 +5,7 @@
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 # 确保项目根目录在 Python 路径中
@@ -20,7 +21,7 @@ from src.settings import settings
 from src.storage.mysql_store import MySQLStorage
 
 
-def cmd_run(args):
+def cmd_run(args: argparse.Namespace) -> None:
     """执行单次采集"""
     collector_name = args.source
     logger.info(f"开始采集: {collector_name}")
@@ -54,7 +55,7 @@ def cmd_run(args):
         sys.exit(1)
 
 
-def cmd_run_all(args):
+def cmd_run_all(args: argparse.Namespace) -> None:
     """执行所有采集器"""
     from src.scheduler.tasks import run_all_collectors
 
@@ -65,7 +66,7 @@ def cmd_run_all(args):
         logger.info(f"采集完成: 成功 {result['success']}/{result['total']}")
 
 
-def cmd_run_parallel(args):
+def cmd_run_parallel(args: argparse.Namespace) -> None:
     """并行执行采集器"""
     from src.scheduler.tasks import run_parallel_collectors
 
@@ -79,7 +80,7 @@ def cmd_run_parallel(args):
         logger.info(f"并行采集完成: 成功 {result['success']}/{result['total']}")
 
 
-def cmd_scheduler(args):
+def cmd_scheduler(args: argparse.Namespace) -> None:
     """启动定时调度"""
     from src.scheduler.task_manager import task_manager
     from src.scheduler.tasks import run_all_collectors, run_parallel_collectors
@@ -120,15 +121,13 @@ def cmd_scheduler(args):
 
     try:
         while True:
-            import time
-
             time.sleep(1)
     except KeyboardInterrupt:
         task_manager.stop()
         logger.info("调度器已停止")
 
 
-def cmd_list(args):
+def cmd_list(args: argparse.Namespace) -> None:
     """列出所有采集器"""
     collectors = list_collectors()
     print("\n可用的采集器:")
@@ -138,7 +137,7 @@ def cmd_list(args):
     print()
 
 
-def cmd_status(args):
+def cmd_status(args: argparse.Namespace) -> None:
     """查看任务状态"""
     from src.scheduler.task_manager import task_manager
 
@@ -157,7 +156,7 @@ def cmd_status(args):
         )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="数据采集模板项目",
         formatter_class=argparse.RawDescriptionHelpFormatter,

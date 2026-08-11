@@ -19,13 +19,13 @@ class AlerionCollector(BaseCollector):
     """
 
     # 运营商 ID
-    OPERATOR_ID = "cc2f0c109f7811ec81a473925ff7fe99"
+    OPERATOR_ID: str = "cc2f0c109f7811ec81a473925ff7fe99"
 
     # API 配置
-    API_URL = "https://int-quoting-legacy.flyeasy.co/api/search"
+    API_URL: str = "https://int-quoting-legacy.flyeasy.co/api/search"
 
     # 请求头
-    HEADERS = {
+    HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "application/json, text/plain, */*",
         "Accept-Language": "en-US,en;q=0.9",
@@ -35,7 +35,7 @@ class AlerionCollector(BaseCollector):
     }
 
     # 请求体
-    PAYLOAD = {
+    PAYLOAD: dict[str, Any] = {
         "source": "eq",
         "trip": "offers",
         "promoteOpIds": "all",
@@ -70,7 +70,7 @@ class AlerionCollector(BaseCollector):
 
         # 解析 JSON
         data = json.loads(content)
-        records = []
+        records: list[dict[str, Any]] = []
 
         # 提取航班数据
         flights = data.get("flights", {}).get("departing", [])
@@ -79,7 +79,7 @@ class AlerionCollector(BaseCollector):
                 record = self._parse_flight(flight)
                 if record:
                     records.append(record)
-            except Exception as e:
+            except (KeyError, ValueError, TypeError) as e:
                 logger.warning(f"[{self.name}] 解析航班数据失败: {e}")
                 continue
 
@@ -112,7 +112,7 @@ class AlerionCollector(BaseCollector):
                 end_time = date_parser.isoparse(flight["date2"])
             if schedule_item.get("takeOffDate"):
                 take_off_time = date_parser.isoparse(schedule_item["takeOffDate"])
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug(f"时间解析失败: {e}")
 
         return {

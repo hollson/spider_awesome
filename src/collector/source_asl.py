@@ -22,19 +22,21 @@ class ASLCollector(BaseCollector):
     """
 
     # 运营商 ID
-    OPERATOR_ID = "5da241f1177e4a41b9ae94f83b44a063"
+    OPERATOR_ID: str = "5da241f1177e4a41b9ae94f83b44a063"
 
     # 基础 URL
-    BASE_URL = "https://www.aslgroup.eu/en/empty-legs"
+    BASE_URL: str = "https://www.aslgroup.eu/en/empty-legs"
 
     # 请求头
-    HEADERS = {
+    HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
     }
 
-    def __init__(self):
+    current_url: str
+
+    def __init__(self) -> None:
         super().__init__()
         self.current_url = self.BASE_URL
 
@@ -49,7 +51,7 @@ class ASLCollector(BaseCollector):
         Returns:
             采集到的数据列表
         """
-        all_records = []
+        all_records: list[dict[str, Any]] = []
 
         # 尝试从缓存读取
         cache_pattern = "ASL_raw_*.html"
@@ -117,8 +119,8 @@ class ASLCollector(BaseCollector):
         Returns:
             (数据列表, 下一页 URL 列表)
         """
-        records = []
-        next_pages = []
+        records: list[dict[str, Any]] = []
+        next_pages: list[str] = []
 
         soup = BeautifulSoup(html, "html.parser")
 
@@ -141,7 +143,7 @@ class ASLCollector(BaseCollector):
 
         return records, next_pages
 
-    def _parse_article(self, article) -> dict[str, Any] | None:
+    def _parse_article(self, article: Any) -> dict[str, Any] | None:
         """解析单篇文章（航班数据）"""
         # 提取标题
         title_elem = article.find("span", class_="plane-name")

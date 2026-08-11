@@ -29,7 +29,7 @@ class Database:
             return "mysql"
         return "unknown"
 
-    def __init__(self, url: str = None):
+    def __init__(self, url: str | None = None):
         """
         初始化数据库连接
 

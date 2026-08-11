@@ -21,7 +21,7 @@ class CollectorError(DataCollectorError):
 class RequestError(CollectorError):
     """请求异常"""
 
-    def __init__(self, url: str, message: str = "请求失败", status_code: int = None):
+    def __init__(self, url: str, message: str = "请求失败", status_code: int | None = None):
         self.url = url
         self.status_code = status_code
         super().__init__(f"{message}: {url} (status={status_code})")

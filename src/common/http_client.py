@@ -134,14 +134,14 @@ class HttpClient:
         """DELETE 请求"""
         return self.request("DELETE", url, **kwargs)
 
-    def close(self):
+    def close(self) -> None:
         """关闭会话"""
         self.session.close()
 
-    def __enter__(self):
+    def __enter__(self) -> "HttpClient":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> None:
         self.close()
 
 

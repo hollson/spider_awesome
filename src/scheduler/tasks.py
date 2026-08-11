@@ -91,7 +91,7 @@ def run_all_collectors() -> dict[str, Any]:
     return total_result
 
 
-def run_parallel_collectors(collector_names: list[str] = None) -> dict[str, Any]:
+def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[str, Any]:
     """
     并行执行多个采集器任务
 

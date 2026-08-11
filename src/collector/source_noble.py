@@ -18,9 +18,9 @@ class NobleCollector(BaseCollector):
     通过 GET JSON API 获取空退航班数据
     """
 
-    OPERATOR_ID = "0837f31300214e05a9aa24990a16d4e4"
-    API_URL = "https://portal.nobleaircharter.com/api/nac-connector-empty-leg-trips/get-available-empty-leg-trips"
-    HEADERS = {
+    OPERATOR_ID: str = "0837f31300214e05a9aa24990a16d4e4"
+    API_URL: str = "https://portal.nobleaircharter.com/api/nac-connector-empty-leg-trips/get-available-empty-leg-trips"
+    HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "application/json",
         "Accept-Language": "en-US,en;q=0.9",
@@ -41,14 +41,14 @@ class NobleCollector(BaseCollector):
         )
 
         flights = json.loads(content)
-        records = []
+        records: list[dict[str, Any]] = []
 
         for flight in flights:
             try:
                 record = self._parse_flight(flight)
                 if record:
                     records.append(record)
-            except Exception as e:
+            except (KeyError, ValueError, TypeError) as e:
                 logger.warning(f"[{self.name}] Parse error: {e}")
                 continue
 
