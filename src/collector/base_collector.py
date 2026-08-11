@@ -80,7 +80,9 @@ class BaseCollector(ABC):
         Returns:
             缓存文件完整路径
         """
-        cache_dir = Path("./data/raw")
+        from src.settings import settings
+
+        cache_dir = Path(settings.RAW_DATA_DIR)
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir / filename
 

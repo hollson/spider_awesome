@@ -170,7 +170,7 @@ RETRY_COUNT=3
 DB_TYPE=sqlite          # 可选: sqlite, postgresql, mysql
 
 # SQLite（默认）
-SQLITE_PATH=var/data/spider_awesome.db
+SQLITE_PATH=var/database/spider_awesome.sqlite3
 
 # PostgreSQL
 PG_HOST=127.0.0.1

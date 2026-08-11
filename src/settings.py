@@ -25,7 +25,7 @@ class Settings:
     DB_TYPE: str = os.getenv("DB_TYPE", "sqlite")
 
     # ========== SQLite 配置 ==========
-    SQLITE_PATH: str = os.getenv("SQLITE_PATH", "var/data/spider_awesome.db")
+    SQLITE_PATH: str = os.getenv("SQLITE_PATH", "var/database/spider_awesome.sqlite3")
 
     # ========== PostgreSQL 配置 ==========
     PG_HOST: str = os.getenv("PG_HOST", "127.0.0.1")
@@ -40,6 +40,9 @@ class Settings:
     MYSQL_USER: str = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "")
     MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "spider_awesome")
+
+    # ========== 数据目录 ==========
+    RAW_DATA_DIR: str = os.getenv("RAW_DATA_DIR", "var/raw")
 
     # ========== 代理 ==========
     HTTP_PROXY: Optional[str] = os.getenv("HTTP_PROXY") or None

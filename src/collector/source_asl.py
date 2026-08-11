@@ -53,7 +53,9 @@ class ASLCollector(BaseCollector):
 
         # 尝试从缓存读取
         cache_pattern = "ASL_raw_*.html"
-        cache_files = list(Path("./data/raw").glob(cache_pattern))
+        from src.settings import settings
+
+        cache_files = list(Path(settings.RAW_DATA_DIR).glob(cache_pattern))
 
         if cache_files:
             logger.info(f"[{self.name}] 从缓存读取 {len(cache_files)} 个文件")
