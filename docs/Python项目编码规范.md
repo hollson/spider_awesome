@@ -54,10 +54,10 @@ def func(a: int, b: str = "default") -> None:
 
 
 # ❌ 错误 — 运算符两侧缺少空格
-total = num1+num2*(num3-num4)
+total = num1 + num2 * (num3 - num4)
 
 
-def func(a:int, b:str="default") -> None:
+def func(a: int, b: str = "default") -> None:
     pass
 ```
 
@@ -256,12 +256,14 @@ def get_value(key: str) -> str | None:
 ```python
 # 场景1：数据库字段 — 根据业务语义选择
 row["expires_at"] = some_date.isoformat() if condition else None  # NULL 表示未设置
-row["description"] = description if description else ""           # 空字符串表示无描述
+row["description"] = description if description else ""  # 空字符串表示无描述
+
 
 # 场景2：函数返回值 — 无结果用 None，空结果用空容器
 def find_user(user_id: int) -> dict | None:
     """未找到返回 None"""
     return user_cache.get(user_id)
+
 
 def get_tags(item_id: int) -> list[str]:
     """无标签返回空列表"""

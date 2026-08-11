@@ -72,6 +72,7 @@ def setup_logger() -> None:
     logging.getLogger("urllib3").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
     import urllib3
+
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # 6) 拦截 stdlib logging → Loguru（只转发 WARNING 及以上）
