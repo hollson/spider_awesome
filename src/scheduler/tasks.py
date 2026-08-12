@@ -131,28 +131,23 @@ def run_all_collectors() -> dict[str, Any]:
     Returns:
         任务执行结果
     """
-    logger.info("[Task] 开始执行所有采集任务")
-    start_time = datetime.now()
+    print("🚀 开始串行采集...")
 
     collectors = list_enabled_collectors()
     total_result = {"total": 0, "success": 0, "failed": 0}
 
-    for name in collectors:
+    for i, name in enumerate(collectors, 1):
+        print(f"  [{i}/{len(collectors)}] {name}...", end=" ", flush=True)
         try:
             result = run_collector(name)
             total_result["total"] += result["total"]
             total_result["success"] += result["success"]
             total_result["failed"] += result["failed"]
+            print(f"✓ ({result['total']}条)")
         except Exception:
-            logger.warning(f"[Task] {name} 执行失败")
+            print("✗ 失败")
             continue
 
-    elapsed = (datetime.now() - start_time).total_seconds()
-    logger.info(
-        f"[Task] 所有采集任务完成 "
-        f"(共 {len(collectors)} 个, 耗时 {elapsed:.1f}s, "
-        f"成功 {total_result['success']}/{total_result['total']})"
-    )
     return total_result
 
 
@@ -173,8 +168,7 @@ def run_parallel_collectors(collector_names: list[str] = None) -> dict[str, Any]
     if collector_names is None:
         collector_names = list_enabled_collectors()
 
-    logger.info(f"[Task] 开始并行采集: {collector_names}")
-    start_time = datetime.now()
+    print(f"🚀 开始并行采集: {', '.join(collector_names)}")
 
     total_result = {"total": 0, "success": 0, "failed": 0}
 
@@ -187,15 +181,10 @@ def run_parallel_collectors(collector_names: list[str] = None) -> dict[str, Any]
                 total_result["total"] += result["total"]
                 total_result["success"] += result["success"]
                 total_result["failed"] += result["failed"]
-            except Exception as e:
-                logger.error(f"[Task] {name} 执行失败: {e}")
+                print(f"  ✓ {name} ({result['total']}条)")
+            except Exception:
+                print(f"  ✗ {name} 失败")
 
-    elapsed = (datetime.now() - start_time).total_seconds()
-    logger.info(
-        f"[Task] 并行采集完成 "
-        f"(共 {len(collector_names)} 个, 耗时 {elapsed:.1f}s, "
-        f"成功 {total_result['success']}/{total_result['total']})"
-    )
     return total_result
 
 

@@ -60,11 +60,15 @@ def cmd_run_all(args):
     _print_banner()
     from src.scheduler.tasks import run_all_collectors
 
-    logger.info("开始执行所有采集任务")
+    print("⏳ 开始执行所有采集任务...")
     result = run_all_collectors()
 
-    if not args.dry_run:
-        logger.info(f"采集完成: 成功 {result['success']}/{result['total']}")
+    print(f"\n{'='*50}")
+    print("✅ 采集完成！")
+    print(f"   总计: {result['total']} 条")
+    print(f"   新增: {result['success']} 条")
+    print(f"   去重: {result['failed']} 条")
+    print(f"{'='*50}\n")
 
 
 def cmd_run_parallel(args):
@@ -75,11 +79,15 @@ def cmd_run_parallel(args):
     # 解析采集器列表
     collector_names = args.collectors.split(",") if args.collectors else None
 
-    logger.info("开始并行采集任务")
+    print("⏳ 开始并行采集任务...")
     result = run_parallel_collectors(collector_names)
 
-    if not args.dry_run:
-        logger.info(f"并行采集完成: 成功 {result['success']}/{result['total']}")
+    print(f"\n{'='*50}")
+    print("✅ 并行采集完成！")
+    print(f"   总计: {result['total']} 条")
+    print(f"   新增: {result['success']} 条")
+    print(f"   去重: {result['failed']} 条")
+    print(f"{'='*50}\n")
 
 
 def cmd_scheduler(args):
