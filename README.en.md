@@ -29,24 +29,24 @@
 
 ```mermaid
 graph LR
-    subgraph Collection Layer
+    subgraph Collection
         A1["API Collection"]
         A2["Web Scraping"]
         A3["File Collection"]
     end
 
-    subgraph Processing Layer
+    subgraph Processing
         B1["Data Cleaning"]
         B2["Data Validation"]
     end
 
-    subgraph Storage Layer
+    subgraph Storage
         C1["SQLite"]
         C2["PostgreSQL"]
         C3["MySQL"]
     end
 
-    subgraph Scheduling Layer
+    subgraph Scheduling
         D1["Concurrency"]
         D2["Scheduler"]
         D3["Retry"]
@@ -69,7 +69,6 @@ graph LR
     style D2 fill:#E67E22,color:#fff
     style D3 fill:#E67E22,color:#fff
 ```
-
 
 <br/>
 

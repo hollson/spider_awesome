@@ -29,24 +29,24 @@
 
 ```mermaid
 graph LR
-    subgraph 采集层
+    subgraph 采集
         A1["API 采集"]
         A2["网页采集"]
         A3["文件采集"]
     end
 
-    subgraph 处理层
+    subgraph 处理
         B1["数据清洗"]
         B2["数据校验"]
     end
 
-    subgraph 存储层
+    subgraph 存储
         C1["SQLite"]
         C2["PostgreSQL"]
         C3["MySQL"]
     end
 
-    subgraph 调度层
+    subgraph 调度
         D1["并发控制"]
         D2["定时调度"]
         D3["失败重试"]
