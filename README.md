@@ -1,12 +1,12 @@
 <div align="center">
 <h1>Spider Awesome 🕷️</h1>
-<a href="#"><img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=fff" /></a>
-<a href="#"><img src="https://img.shields.io/badge/SQLAlchemy-2.0-009688?logo=sqlalchemy&logoColor=fff" /></a>
-<a href="#"><img src="https://img.shields.io/badge/License-MIT-lightgreen" /></a>
-<a href="#"><img src="https://img.shields.io/badge/UV-package-6f42c1?logo=astral&logoColor=fff" /></a>
-<a href="#"><img src="https://img.shields.io/badge/Ruff-linter-261230?logo=ruff&logoColor=fff" /></a>
+<a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=fff" /></a>
+<a href="https://www.sqlalchemy.org"><img src="https://img.shields.io/badge/SQLAlchemy-2.0-009688?logo=sqlalchemy&logoColor=fff" /></a>
+<a href="https://pydantic.dev"><img src="https://img.shields.io/badge/Pydantic-2.x-E92063?logo=pydantic&logoColor=fff" /></a>
+<a href="https://github.com/microsoft/playwright"><img src="https://img.shields.io/badge/Playwright-Browser-2EAD33?logo=playwright&logoColor=fff" /></a>
+<a href="https://www.chromium.org"><img src="https://img.shields.io/badge/Chromium-Headless-4285F4?logo=googlechrome&logoColor=fff" /></a>
 <p>基于分层架构的通用数据采集模板项目，支持定时调度、并行采集、多数据库切换</p>
-<a href="README.md">English</a> | <a href="README.md">中文</a>
+<a href="README.en.md">English</a> | <a href="README.md">中文</a>
 </div>
 
 <br/>
@@ -14,12 +14,12 @@
 ## 📋 概述
 
 - 🕷️ **分层解耦**：采集 / 处理 / 存储 / 调度四层独立，职责清晰
-- 🗄️ **多数据库支持**：统一 `DATABASE_URL` 连接串，支持 SQLite / PostgreSQL / MySQL
-- ⏰ **定时调度**：基于 APScheduler，支持串行/并行模式，每个采集器独立调度
-- 🔄 **并发控制**：线程池并行采集，支持失败重试
-- 📡 **采集器自动发现**：`source_*.py` 自动注册，YAML 配置启停
-- 🌍 **环境隔离**：dev/test/prod 三套配置，通过 `ENV_MODE` 零代码切换
-- 🛠️ **生产级工具链**：UV 依赖管理，Ruff 代码质量，Hatchling 构建
+- 📡 **即插即用**：新增采集器只需一个文件，自动发现、自动注册
+- 🗄️ **多数据库**：SQLite / PostgreSQL / MySQL 统一接口，一行配置切换
+- ⏰ **独立调度**：每个采集器独立 cron 时间，互不干扰
+- 🔄 **并发可控**：线程池并行采集，支持失败重试与超时保护
+- 🌍 **环境隔离**：dev / test / prod 多环境配置，零代码切换
+- 🛡️ **健壮性**：无人值守场景下的错误降级、日志分级、自动重试
 
 
 <br/>
