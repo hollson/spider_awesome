@@ -156,15 +156,11 @@ class SilverExampleCollector(BaseCollector):
 
     def _parse_time(self, text: str) -> datetime | None:
         """解析时间文本"""
-        try:
-            # 尝试多种格式
-            for fmt in ["%m/%d/%Y %I:%M %p", "%Y-%m-%d %H:%M", "%b %d, %Y"]:
-                try:
-                    return datetime.strptime(text.strip(), fmt)
-                except ValueError:
-                    continue
-        except Exception:
-            pass
+        for fmt in ["%m/%d/%Y %I:%M %p", "%Y-%m-%d %H:%M", "%b %d, %Y"]:
+            try:
+                return datetime.strptime(text.strip(), fmt)
+            except ValueError:
+                continue
         return None
 
     def _parse_duration(self, text: str) -> int | None:

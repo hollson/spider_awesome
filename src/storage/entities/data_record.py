@@ -5,12 +5,17 @@
 如果你的项目不是航空业务，请直接使用 BaseRecord
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import JSON, Column, DateTime, Float, Index, Integer, SmallInteger, String, Text
 
 from src.storage.entities.base import Base
+
+
+def _utcnow():
+    """获取当前 UTC 时间（带时区）"""
+    return datetime.now(UTC)
 
 
 class DataRecord(Base):
@@ -41,9 +46,9 @@ class DataRecord(Base):
     dest_airport_id = Column(String(64), comment="目的机场 ID")
 
     # 时间相关
-    start_time = Column(DateTime, comment="开始时间")
-    end_time = Column(DateTime, comment="结束时间")
-    take_off_time = Column(DateTime, comment="起飞时间")
+    start_time = Column(DateTime(timezone=True), comment="开始时间")
+    end_time = Column(DateTime(timezone=True), comment="结束时间")
+    take_off_time = Column(DateTime(timezone=True), comment="起飞时间")
 
     # 费用相关
     cost_minutes = Column(Integer, comment="飞行时长（分钟）")
@@ -67,8 +72,8 @@ class DataRecord(Base):
     status = Column(SmallInteger, default=0, comment="数据状态 (0:正常, 1:删除)")
 
     # 时间戳
-    create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    update_time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    create_time = Column(DateTime(timezone=True), default=_utcnow, comment="创建时间")
+    update_time = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, comment="更新时间")
 
     # 索引
     __table_args__ = (

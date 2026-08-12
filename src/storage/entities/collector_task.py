@@ -3,11 +3,16 @@
 记录每次采集任务的执行状态
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Integer, String, Text
 
 from src.storage.entities.base import Base
+
+
+def _utcnow():
+    """获取当前 UTC 时间（带时区）"""
+    return datetime.now(UTC)
 
 
 class CollectorTask(Base):
@@ -23,6 +28,6 @@ class CollectorTask(Base):
     failed_count = Column(Integer, default=0, comment="失败数量")
     duplicate_count = Column(Integer, default=0, comment="重复数量")
     error_message = Column(Text, comment="错误信息")
-    start_time = Column(DateTime, comment="开始时间")
-    end_time = Column(DateTime, comment="结束时间")
-    create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    start_time = Column(DateTime(timezone=True), comment="开始时间")
+    end_time = Column(DateTime(timezone=True), comment="结束时间")
+    create_time = Column(DateTime(timezone=True), default=_utcnow, comment="创建时间")

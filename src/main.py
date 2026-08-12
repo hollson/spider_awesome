@@ -63,12 +63,12 @@ def cmd_run_all(args):
     print("⏳ 开始执行所有采集任务...")
     result = run_all_collectors()
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("✅ 采集完成！")
     print(f"   总计: {result['total']} 条")
     print(f"   新增: {result['success']} 条")
     print(f"   去重: {result['failed']} 条")
-    print(f"{'='*50}\n")
+    print(f"{'=' * 50}\n")
 
 
 def cmd_run_parallel(args):
@@ -82,12 +82,12 @@ def cmd_run_parallel(args):
     print("⏳ 开始并行采集任务...")
     result = run_parallel_collectors(collector_names)
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("✅ 并行采集完成！")
     print(f"   总计: {result['total']} 条")
     print(f"   新增: {result['success']} 条")
     print(f"   去重: {result['failed']} 条")
-    print(f"{'='*50}\n")
+    print(f"{'=' * 50}\n")
 
 
 def cmd_scheduler(args):

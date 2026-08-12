@@ -52,7 +52,7 @@ class Database:
                 connect_args={"check_same_thread": False},
             )
 
-            # SQLite 启用外键支持
+            # SQLite 启用外键支持和时区设置
             @event.listens_for(self.engine, "connect")
             def set_sqlite_pragma(dbapi_connection, connection_record):
                 cursor = dbapi_connection.cursor()

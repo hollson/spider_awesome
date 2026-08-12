@@ -5,12 +5,17 @@
 衍生项目可直接使用此表，或参考创建自己的数据模型
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import JSON, Column, DateTime, Index, SmallInteger, String, Text
 
 from src.storage.entities.base import Base
+
+
+def _utcnow():
+    """获取当前 UTC 时间（带时区）"""
+    return datetime.now(UTC)
 
 
 class BaseRecord(Base):
@@ -38,8 +43,8 @@ class BaseRecord(Base):
     status = Column(SmallInteger, default=0, comment="数据状态 (0:正常, 1:删除)")
 
     # 时间戳
-    create_time = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    update_time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    create_time = Column(DateTime(timezone=True), default=_utcnow, comment="创建时间")
+    update_time = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, comment="更新时间")
 
     # 索引
     __table_args__ = (Index("idx_source_create", "source", "create_time"),)

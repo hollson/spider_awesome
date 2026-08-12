@@ -155,15 +155,11 @@ class ChartRightExampleCollector(BaseCollector):
 
     def _parse_time(self, text: str) -> datetime | None:
         """解析时间文本"""
-        try:
-            # 尝试多种格式
-            for fmt in ["%m/%d/%y", "%m/%d/%Y", "%b %d, %Y", "%Y-%m-%d"]:
-                try:
-                    return datetime.strptime(text.strip(), fmt)
-                except ValueError:
-                    continue
-        except Exception:
-            pass
+        for fmt in ["%m/%d/%y", "%m/%d/%Y", "%b %d, %Y", "%Y-%m-%d"]:
+            try:
+                return datetime.strptime(text.strip(), fmt)
+            except ValueError:
+                continue
         return None
 
     def _parse_duration(self, text: str) -> int | None:
