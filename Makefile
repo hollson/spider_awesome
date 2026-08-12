@@ -108,15 +108,6 @@ init:
 	@echo "✅ 环境初始化完成"
 
 
-#HELP format@格式化
-.PHONY: format
-format:
-	$(call install_tool,ruff)
-	@echo "📝 格式化代码..."
-	@uv tool run ruff format .
-	@echo "✅ 格式化完成"
-
-
 #HELP lint@代码检查
 .PHONY: lint
 lint:
@@ -133,6 +124,15 @@ bandit:
 	@echo "🔒 安全漏洞扫描..."
 	@uv tool run bandit -r src/ -s B101 -f screen
 	@echo "✅ 安全扫描完成"
+
+
+#HELP format@格式化代码
+.PHONY: format
+format:
+	$(call install_tool,ruff)
+	@echo "📝 格式化代码..."
+	@uv tool run ruff format .
+	@echo "✅ 格式化完成"
 
 
 #HELP clean@清理项目
