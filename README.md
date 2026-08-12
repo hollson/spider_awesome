@@ -30,26 +30,26 @@
 ```mermaid
 graph LR
     subgraph 采集层
-        A1["API 接口采集<br/>source_api.py"]
-        A2["网页爬虫采集<br/>source_html.py"]
-        A3["文件采集<br/>source_file.py"]
+        A1["API 采集"]
+        A2["网页采集"]
+        A3["文件采集"]
     end
 
     subgraph 处理层
-        B1["数据清洗<br/>Cleaner"]
-        B2["数据校验<br/>Validator"]
+        B1["数据清洗"]
+        B2["数据校验"]
     end
 
     subgraph 存储层
-        C1["SQLite<br/>开发环境"]
-        C2["PostgreSQL<br/>生产备选"]
-        C3["MySQL<br/>生产备选"]
+        C1["SQLite"]
+        C2["PostgreSQL"]
+        C3["MySQL"]
     end
 
     subgraph 调度层
-        D1["并发控制<br/>ThreadPool"]
-        D2["定时调度<br/>Scheduler"]
-        D3["失败重试<br/>Retry"]
+        D1["并发控制"]
+        D2["定时调度"]
+        D3["失败重试"]
     end
 
     A1 & A2 & A3 --> B1
@@ -69,7 +69,6 @@ graph LR
     style D2 fill:#E67E22,color:#fff
     style D3 fill:#E67E22,color:#fff
 ```
-
 
 <br/>
 

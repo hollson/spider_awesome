@@ -30,26 +30,26 @@
 ```mermaid
 graph LR
     subgraph Collection Layer
-        A1["API Collection<br/>source_api.py"]
-        A2["Web Scraping<br/>source_html.py"]
-        A3["File Collection<br/>source_file.py"]
+        A1["API Collection"]
+        A2["Web Scraping"]
+        A3["File Collection"]
     end
 
     subgraph Processing Layer
-        B1["Data Cleaning<br/>Cleaner"]
-        B2["Data Validation<br/>Validator"]
+        B1["Data Cleaning"]
+        B2["Data Validation"]
     end
 
     subgraph Storage Layer
-        C1["SQLite<br/>Development"]
-        C2["PostgreSQL<br/>Production"]
-        C3["MySQL<br/>Production"]
+        C1["SQLite"]
+        C2["PostgreSQL"]
+        C3["MySQL"]
     end
 
     subgraph Scheduling Layer
-        D1["Concurrency<br/>ThreadPool"]
-        D2["Scheduler<br/>Cron"]
-        D3["Retry<br/>Backoff"]
+        D1["Concurrency"]
+        D2["Scheduler"]
+        D3["Retry"]
     end
 
     A1 & A2 & A3 --> B1
