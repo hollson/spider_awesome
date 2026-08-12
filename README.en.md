@@ -43,19 +43,19 @@ graph LR
     subgraph Storage Layer
         C1["SQLite<br/>Development"]
         C2["PostgreSQL<br/>Production"]
-        C3["MySQL<br/>Alternative"]
+        C3["MySQL<br/>Production"]
     end
 
     subgraph Scheduling Layer
-        D1["Scheduler<br/>Cron"]
-        D2["Concurrency<br/>ThreadPool"]
+        D1["Concurrency<br/>ThreadPool"]
+        D2["Scheduler<br/>Cron"]
         D3["Retry<br/>Backoff"]
     end
 
     A1 & A2 & A3 --> B1
     B1 --> B2
     B2 --> C1 & C2 & C3
-    D1 -->|Trigger| A1 & A2 & A3
+    D2 -->|Trigger| A1 & A2 & A3
 
     style A1 fill:#4A90D9,color:#fff
     style A2 fill:#4A90D9,color:#fff
