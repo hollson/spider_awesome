@@ -30,7 +30,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "ruff>=0.16.2",             # 代码检查和格式化
-  "basedpyright>=1.39.8",     # 静态类型检查
+  "ty>=0.0.70",               # 静态类型检查（快速）
   "bandit>=1.9.3",            # 代码安全扫描
 ]
 
@@ -88,11 +88,12 @@ ignore = [
 "__init__.py" = ["F401"]  # 允许未使用的导入（用于导出）
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 静态类型检查（Basedpyright）
+# 静态类型检查（ty）
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[tool.basedpyright]
-pythonVersion = "3.12"
-typeCheckingMode = "basic"
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.ty.src]
 include = ["src"]
 exclude = [
   "venv",
@@ -104,7 +105,6 @@ exclude = [
   "var",
   "tests",
 ]
-reportMissingTypeStubs = false
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 安全扫描（Bandit）

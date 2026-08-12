@@ -107,10 +107,18 @@ init:
 	uv sync
 	@echo "✅ 环境初始化完成"
 
+#HELP check@类型检查
+.PHONY: check
+check:
+	$(call install_tool,ty)
+	@echo "🔍 类型检查..."
+	@uv tool run ty check src/ || true
+	@echo "✅ 类型检查完成"
+
 
 #HELP lint@代码检查
 .PHONY: lint
-lint:
+lint: 
 	$(call install_tool,ruff)
 	@echo "🔍 代码检查..."
 	@uv tool run ruff check src/ --fix || true

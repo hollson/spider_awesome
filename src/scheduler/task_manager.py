@@ -245,7 +245,8 @@ class TaskManager:
                 else:
                     record.status = TaskStatus.FAILED
                     record.end_time = datetime.now()
-                    record.duration = (record.end_time - record.start_time).total_seconds()
+                    if record.start_time:
+                        record.duration = (record.end_time - record.start_time).total_seconds()
                     logger.error(f"[Scheduler] 任务 {task_id} 最终失败 (已重试 {self.retry_count} 次)")
 
                     # 记录失败审计日志
@@ -329,9 +330,9 @@ class TaskManager:
         """
         try:
             from src.storage.models import CollectLog
-            from src.storage.session import SessionLocal
+            from src.storage.session import get_db_instance
 
-            with SessionLocal() as session:
+            with get_db_instance().get_session() as session:
                 log = CollectLog(
                     collector_name=collector_name,
                     status=status,

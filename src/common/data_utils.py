@@ -64,7 +64,7 @@ def deduplicate(
         去重后的列表
     """
     if keep == "last":
-        records = reversed(records)
+        records = list(reversed(records))
 
     seen = set()
     result = []

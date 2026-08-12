@@ -110,6 +110,8 @@ class BaseRecordStorage(BaseStorage):
     def query(
         self,
         source: str | None = None,
+        origin_code: str | None = None,
+        dest_code: str | None = None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[dict[str, Any]]:
@@ -118,6 +120,8 @@ class BaseRecordStorage(BaseStorage):
 
         Args:
             source: 数据来源
+            origin_code: 出发地编码（仅 DataRecord 使用）
+            dest_code: 目的地编码（仅 DataRecord 使用）
             limit: 返回数量限制
             offset: 偏移量
 

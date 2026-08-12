@@ -129,8 +129,11 @@ class ASLExampleCollector(BaseCollector):
         # 提取分页链接
         pagination = soup.find_all("a", class_="pagination-page")
         for link in pagination:
-            if "is-active" not in link.get("class", []):
-                next_pages.append(link.get("href", ""))
+            classes = link.get("class")
+            if classes and "is-active" not in classes:
+                href = link.get("href", "")
+                if isinstance(href, str):
+                    next_pages.append(href)
 
         # 提取航班数据
         articles = soup.find_all("article", class_="plane")
@@ -222,7 +225,8 @@ class ASLExampleCollector(BaseCollector):
         route = route.replace(" ", "")
         match = re.match(r"([^(]+)\(([^)]+)\)(.+)\(([^)]+)\)", route)
         if match:
-            return match.groups()
+            groups = match.groups()
+            return groups[0], groups[1], groups[2], groups[3]
         return "", "", "", ""
 
 
