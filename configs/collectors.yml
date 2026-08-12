@@ -52,7 +52,9 @@ scheduler:
 # 注意：name 必须与 source_*.py 文件名对应
 #   source_example_alerion.py → example_alerion
 #   source_example_asl.py → example_asl
-#   source_example_noble.py → example_noble
+#   source_example_lux.py → example_lux
+#   source_example_silver.py → example_silver
+#   source_example_chartright.py → example_chartright
 #   source_example.py → example_slow, example_medium, example_fast
 # ===========================================================================
 
@@ -69,9 +71,22 @@ collectors:
     timeout: 600
     persist: true
 
-  example_noble:
+  # LuxAviation - POST JSON API 分页采集（数据量最大）
+  example_lux:
     enabled: true
     cron: "0 */3 * * *"        # 每 3 小时
+    persist: true
+
+  # Silver - HTML 卡片解析采集
+  example_silver:
+    enabled: true
+    cron: "0 */4 * * *"        # 每 4 小时
+    persist: true
+
+  # ChartRight - HTML 卡片解析采集
+  example_chartright:
+    enabled: true
+    cron: "30 */2 * * *"       # 每 2 小时半点
     persist: true
 
   # ----- 并发模拟采集器（用于测试并发，不入库）-----

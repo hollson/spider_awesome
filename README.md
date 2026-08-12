@@ -78,12 +78,12 @@ Usage:  make [command] [options]
 
 Available Commands:
    init           初始化
-   format         格式化
    lint           代码检查
    bandit         安全扫描
+   format         格式化代码
    clean          清理项目
-   dev            开发运行（串行）
-   run            生产运行（并行）
+   run            开发运行（串行）
+   prod           生产运行（并行）
    scheduler      生产运行（定时）
    test           运行测试
    status         任务状态

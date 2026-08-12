@@ -85,7 +85,7 @@ scheduler:
 #   示例：
 #     COLLECTOR_EXAMPLE_ALERION_ENABLED=true
 #     COLLECTOR_EXAMPLE_ASL_CRON=0 */3 * * *
-#     COLLECTOR_EXAMPLE_NOBLE_TIMEOUT=600
+#     COLLECTOR_EXAMPLE_LUX_TIMEOUT=600
 #
 # ===========================================================================
 
@@ -114,10 +114,31 @@ collectors:
     retry: 2
     persist: true
 
-  # Noble - GET JSON API 采集
-  example_noble:
+  # LuxAviation - POST JSON API 分页采集（数据量最大，200+条）
+  example_lux:
     enabled: true
     cron: "0 */3 * * *"           # 每 3 小时
+    timeout: 300
+    retry: 2
+    persist: true
+    config:
+      operator_id: "804d5f81fee1458dbf5140679f60c65c"
+      api_url: "https://lms-api.luxaviation.com/ext-lead/load-emptylegs"
+
+  # Silver - HTML 卡片解析采集（190+条）
+  example_silver:
+    enabled: true
+    cron: "0 */4 * * *"           # 每 4 小时
+    timeout: 300
+    retry: 2
+    persist: true
+
+  # ChartRight - HTML 卡片解析采集（40+条）
+  example_chartright:
+    enabled: true
+    cron: "30 */2 * * *"          # 每 2 小时半点
+    timeout: 300
+    retry: 2
     persist: true
 
   # =========================================================================

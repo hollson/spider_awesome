@@ -81,12 +81,12 @@ Usage:  make [command] [options]
 
 Available Commands:
    init           Initialize project
-   format         Format code
    lint           Lint code
    bandit         Security scan
+   format         Format code
    clean          Clean project
-   dev            Run in dev mode (serial)
-   run            Run in production mode (parallel)
+   run            Run in dev mode (serial)
+   prod           Run in production mode (parallel)
    scheduler      Run scheduler
    test           Run tests
    status         Task status

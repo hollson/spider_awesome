@@ -142,17 +142,17 @@ clean:
 	@echo "✅ 项目清理完成"
 
 
-#HELP dev@开发运行（串行）
-.PHONY: dev
-dev:
+#HELP run@开发运行（串行）
+.PHONY: run
+run:
 	@echo "🚀 开发运行（串行）..."
 	@mkdir -p var && echo "dev" > var/.env_mode
 	@ENV_MODE=dev uv run python src/main.py run-all
 
 
-#HELP run@生产运行（并行）
-.PHONY: run
-run:
+#HELP prod@生产运行（并行）
+.PHONY: prod
+prod:
 	@echo "🚀 生产运行（并行）..."
 	@mkdir -p var && echo "prod" > var/.env_mode
 	@ENV_MODE=prod uv run python src/main.py run-parallel
@@ -196,7 +196,7 @@ logs:
 		echo "📋 查看审计日志 (环境: $$ENV)"; \
 		ENV_MODE=$$ENV uv run python src/main.py logs; \
 	else \
-		echo "⚠️  未找到运行记录，请先执行 make dev/make run/make scheduler"; \
+		echo "⚠️  未找到运行记录，请先执行 make run/make prod/make scheduler"; \
 	fi
 
 
