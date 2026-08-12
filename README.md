@@ -21,9 +21,7 @@
 - 🌍 **环境隔离**：dev / test / prod 多环境配置，零代码切换
 - 🛡️ **健壮性**：无人值守场景下的错误降级、日志分级、自动重试
 
-
 <br/>
-
 
 ## 🏗️ 架构设计
 
@@ -72,7 +70,6 @@ graph LR
 
 <br/>
 
-
 ## 🚀 快速开始
 
 ```bash
@@ -105,7 +102,9 @@ ENV_MODE=prod make scheduler
 # Windows PowerShell
 $env:ENV_MODE="prod"; make scheduler
 ```
+
 **执行示例：**
+
 ```bash
 $ make dev
 🚀  开 发 运 行 （ 串 行 ） ...
@@ -120,6 +119,7 @@ $ make dev
 12-01 00:47:34 INF src.scheduler.tasks:run_all_collectors:82 [Task] 开 始 执 行 所 有 采 集 任 务
 12-01 19:47:34 INF src.scheduler.tasks:run_collector:28 [Task] 开 始 采 集 : example_alerion
 ```
+
 _更多内容，请查看[数据采集项目说明文档](docs/数据采集项目说明文档.md)_
 
 <br/>

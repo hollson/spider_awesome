@@ -17,25 +17,25 @@
 - 缩进：统一使用 **4 个空格**，禁止使用 Tab（编辑器需配置"Tab 自动转为 4 空格"）；
 - 行长度：单行代码不超过 120 个字符（项目 Ruff 配置），注释/文档字符串不超过 80 个字符；
 - 换行原则：
-    - 二元运算符后换行（如 +、=、and/or）；
-    - 函数/类参数列表过长时，换行后缩进 4 空格，末尾括号单独换行；
+  - 二元运算符后换行（如 +、=、and/or）；
+  - 函数/类参数列表过长时，换行后缩进 4 空格，末尾括号单独换行；
 
-    ```python
-    # 正确
-    def get_user_list(
-        user_type: str,
-        page: int = 1,
-        page_size: int = 20
-    ) -> List[Dict[str, Any]]:
-        pass
+  ```python
+  # 正确
+  def get_user_list(
+      user_type: str,
+      page: int = 1,
+      page_size: int = 20
+  ) -> List[Dict[str, Any]]:
+      pass
 
-    # 错误
-    def get_user_list(user_type: str, page: int = 1, page_size: int = 20) -> List[Dict[str, Any]]:  # 行过长
-    ```
+  # 错误
+  def get_user_list(user_type: str, page: int = 1, page_size: int = 20) -> List[Dict[str, Any]]:  # 行过长
+  ```
 
 - 空行：
-    - 模块级：函数/类之间空 2 行，类内方法之间空 1 行；
-    - 逻辑块：代码逻辑独立块之间空 1 行，避免无意义空行。
+  - 模块级：函数/类之间空 2 行，类内方法之间空 1 行；
+  - 逻辑块：代码逻辑独立块之间空 1 行，避免无意义空行。
 
 ### 2.2 空格使用
 
@@ -69,9 +69,9 @@ def func(a: int, b: str = "default") -> None:
 
 - 导入顺序：标准库 → 第三方库 → 项目内部库，各组之间空 1 行；
 - 导入方式：
-    - 禁止通配符导入（`from module import *`），避免命名冲突；
-    - 优先使用**绝对导入**，禁止相对导入，避免隐式依赖与 IDE 跳转困难；
-    - 单行只导入一个模块/对象，禁止一行多导入（除分组导入）；
+  - 禁止通配符导入（`from module import *`），避免命名冲突；
+  - 优先使用**绝对导入**，禁止相对导入，避免隐式依赖与 IDE 跳转困难；
+  - 单行只导入一个模块/对象，禁止一行多导入（除分组导入）；
 
 ```python
 # 正确（绝对导入）
@@ -105,9 +105,9 @@ from typing import Any, TypeVar
 - 单行注释：`#` 后加 1 个空格，注释内容与代码空 2 个空格（如 `x = 10  # 存储用户ID`）；
 - 块注释：多行注释用 `#` 开头，对齐缩进，说明复杂逻辑；
 - 文档字符串（Docstring）：
-    - 复杂函数/公开 API 必须写 docstring，格式统一使用 Google 风格；
-    - 简单函数（如 getter/setter、工具函数）可省略 docstring，代码自解释即可；
-    - 包含功能说明、参数、返回值、异常（如有）、示例（复杂函数）；
+  - 复杂函数/公开 API 必须写 docstring，格式统一使用 Google 风格；
+  - 简单函数（如 getter/setter、工具函数）可省略 docstring，代码自解释即可；
+  - 包含功能说明、参数、返回值、异常（如有）、示例（复杂函数）；
 
 ```python
 # 复杂函数 - 需要 docstring
@@ -249,9 +249,9 @@ def get_value(key: str) -> str | None:
 ```
 
 - None 与联合类型：明确区分 `None` 和空值的语义，根据场景选择：
-    - 数据库字段：`NULL` 用 `None`，空值用 `""` 或 `0`
-    - API 响应：缺失字段用 `None`，空值保持原类型
-    - 函数返回值：无结果用 `None`，空结果用空容器（`[]`/`{}`）
+  - 数据库字段：`NULL` 用 `None`，空值用 `""` 或 `0`
+  - API 响应：缺失字段用 `None`，空值保持原类型
+  - 函数返回值：无结果用 `None`，空结果用空容器（`[]`/`{}`）
 
 ```python
 # 场景1：数据库字段 — 根据业务语义选择
@@ -312,50 +312,50 @@ data = json.loads(raw)  # type: ignore
 ### 3.4 控制流与异常处理
 
 - 条件语句：
-    - 单行条件仅用于简单场景（如 `x = 1 if flag else 0`），复杂逻辑拆多行；
-    - 多条件判断优先用 `if/elif/else`，避免多层嵌套（超过 3 层需拆分函数）；
+  - 单行条件仅用于简单场景（如 `x = 1 if flag else 0`），复杂逻辑拆多行；
+  - 多条件判断优先用 `if/elif/else`，避免多层嵌套（超过 3 层需拆分函数）；
 - 循环语句：
-    - 优先使用列表推导/生成器表达式替代简单循环（如 `[x*2 for x in lst if x > 0]`）；
-    - 避免无退出条件的无限循环（`while True`），常驻服务场景（如调度器、服务器）可使用 `while True`，需添加 `KeyboardInterrupt` 捕获以支持优雅退出；
+  - 优先使用列表推导/生成器表达式替代简单循环（如 `[x*2 for x in lst if x > 0]`）；
+  - 避免无退出条件的无限循环（`while True`），常驻服务场景（如调度器、服务器）可使用 `while True`，需添加 `KeyboardInterrupt` 捕获以支持优雅退出；
 - 异常处理：
-    - 精准捕获异常（如 `except ValueError` 而非 `except Exception`）；
-    - `try/except` 仅包裹必要代码，避免"大 try 块"；
-    - 捕获异常后必须处理（日志/提示），禁止空 `except`；
-    ```python
-    # 正确
-    try:
-        num = int(input("输入数字："))
-    except ValueError as e:
-        logger.error(f"输入非数字：{e}")
-        raise ValueError("请输入有效的整数") from e  # 保留异常栈
-    ```
+  - 精准捕获异常（如 `except ValueError` 而非 `except Exception`）；
+  - `try/except` 仅包裹必要代码，避免"大 try 块"；
+  - 捕获异常后必须处理（日志/提示），禁止空 `except`；
+  ```python
+  # 正确
+  try:
+      num = int(input("输入数字："))
+  except ValueError as e:
+      logger.error(f"输入非数字：{e}")
+      raise ValueError("请输入有效的整数") from e  # 保留异常栈
+  ```
 
 ### 3.5 函数与类规范
 
 - 函数：
-    - 单一职责：一个函数仅做一件事，建议不超过 50 行，过长应考虑拆分；
-    - 默认参数：禁止使用可变对象（列表/字典）作为默认参数（改用 `None`）；
+  - 单一职责：一个函数仅做一件事，建议不超过 50 行，过长应考虑拆分；
+  - 默认参数：禁止使用可变对象（列表/字典）作为默认参数（改用 `None`）；
 
-    ```python
-    # 正确
-    def add_item(item, lst=None):
-        if lst is None:
-            lst = []
-        lst.append(item)
-        return lst
+  ```python
+  # 正确
+  def add_item(item, lst=None):
+      if lst is None:
+          lst = []
+      lst.append(item)
+      return lst
 
 
-    # 错误
-    def add_item(item, lst=[]):  # 可变默认参数会复用
-        lst.append(item)
-        return lst
-    ```
+  # 错误
+  def add_item(item, lst=[]):  # 可变默认参数会复用
+      lst.append(item)
+      return lst
+  ```
 
 - 类：
-    - 类名遵循大驼峰，必须有 docstring 说明类用途；
-    - 继承：优先使用组合而非继承，继承层级不超过 3 层；
-    - 魔术方法：仅实现必要的魔术方法（如 `__init__`/`__str__`），禁止滥用；
-    - 私有成员：仅用单下划线（`_private`）标识，双下划线（`__`）仅用于避免子类覆盖。
+  - 类名遵循大驼峰，必须有 docstring 说明类用途；
+  - 继承：优先使用组合而非继承，继承层级不超过 3 层；
+  - 魔术方法：仅实现必要的魔术方法（如 `__init__`/`__str__`），禁止滥用；
+  - 私有成员：仅用单下划线（`_private`）标识，双下划线（`__`）仅用于避免子类覆盖。
 
 <br/>
 
@@ -368,14 +368,14 @@ data = json.loads(raw)  # type: ignore
 
 ### 4.2 具体命名规则
 
-| 命名对象 | 格式要求 | 正确示例 | 错误示例 |
-| -------- | -------- | -------- | -------- |
-| 项目名/仓库名/PyPI 包名 | 连字符分隔（kebab-case） | user-management-system | user_management_system |
-| 文件名/模块名/包名 | 下划线分隔（snake_case） | user_info.py、auth_core/ | user-info.py、authCore/ |
-| 变量/函数/方法名 | 下划线分隔（snake_case） | user_name、get_user_info() | userName、getUserInfo() |
-| 类名/异常类名 | 大驼峰（CamelCase） | UserInfo、AuthError | user_info、auth_error |
-| 常量名 | 全大写+下划线 | MAX_RETRY、TIMEOUT_SEC | MaxRetry、timeout_sec |
-| 私有成员（变量/方法） | 单下划线开头+snake_case | _private_var、_check_auth() | __privateVar、-checkAuth() |
+| 命名对象                | 格式要求                 | 正确示例                      | 错误示例                     |
+| ----------------------- | ------------------------ | ----------------------------- | ---------------------------- |
+| 项目名/仓库名/PyPI 包名 | 连字符分隔（kebab-case） | user-management-system        | user_management_system       |
+| 文件名/模块名/包名      | 下划线分隔（snake_case） | user_info.py、auth_core/      | user-info.py、authCore/      |
+| 变量/函数/方法名        | 下划线分隔（snake_case） | user_name、get_user_info()    | userName、getUserInfo()      |
+| 类名/异常类名           | 大驼峰（CamelCase）      | UserInfo、AuthError           | user_info、auth_error        |
+| 常量名                  | 全大写+下划线            | MAX_RETRY、TIMEOUT_SEC        | MaxRetry、timeout_sec        |
+| 私有成员（变量/方法）   | 单下划线开头+snake_case  | \_private_var、\_check_auth() | \_\_privateVar、-checkAuth() |
 
 ### 4.3 补充规范
 
@@ -412,9 +412,9 @@ _ = conn.execute("DROP TABLE IF EXISTS users")
 
 ### 5.3 检查工具
 
-| 工具 | 用途 |
-|------|------|
-| `mypy` | 静态类型检查 |
+| 工具      | 用途                          |
+| --------- | ----------------------------- |
+| `mypy`    | 静态类型检查                  |
 | `pyright` | 静态类型检查，VSCode/IDE 集成 |
 
 > 工具特定规则（如 pyright ignore）请参考工具官方文档。
@@ -441,9 +441,9 @@ def test_get_user_info():
 ## 七、📦 版本与提交规范
 
 - 版本号：遵循语义化版本（MAJOR.MINOR.PATCH），如 1.2.3；
-    - MAJOR：不兼容的 API 变更；
-    - MINOR：新增功能，兼容旧版本；
-    - PATCH：修复 bug，兼容旧版本；
+  - MAJOR：不兼容的 API 变更；
+  - MINOR：新增功能，兼容旧版本；
+  - PATCH：修复 bug，兼容旧版本；
 - 提交规范：提交信息遵循 `类型: 描述` 格式，如 `feat: 新增用户登录接口`、`fix: 修复用户信息查询bug`；
   类型包括：feat（功能）、fix（修复）、docs（文档）、style（格式）、refactor（重构）、test（测试）、chore（构建）。
 
