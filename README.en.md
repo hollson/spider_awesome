@@ -5,7 +5,7 @@
 <a href="https://pydantic.dev"><img src="https://img.shields.io/badge/Pydantic-2.x-E92063?logo=pydantic&logoColor=fff" /></a>
 <a href="https://github.com/microsoft/playwright"><img src="https://img.shields.io/badge/Playwright-Browser-2EAD33?logo=playwright&logoColor=fff" /></a>
 <a href="https://www.chromium.org"><img src="https://img.shields.io/badge/Chromium-Headless-4285F4?logo=googlechrome&logoColor=fff" /></a>
-<p>Layered-architecture data collection framework with scheduled scheduling, parallel collection, and multi-database support</p>
+<p>Layered-architecture data collection framework</p>
 <a href="README.en.md">English</a> | <a href="README.md">中文</a>
 </div>
 
