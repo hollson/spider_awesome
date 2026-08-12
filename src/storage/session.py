@@ -72,13 +72,17 @@ class Database:
         self.SessionLocal = sessionmaker(bind=self.engine)
 
     def create_tables(self):
-        """创建所有表"""
+        """创建所有表（已存在则跳过）"""
         try:
-            Base.metadata.create_all(self.engine)
-            logger.info(f"数据库表创建成功 ({self.db_type})")
+            Base.metadata.create_all(self.engine, checkfirst=True)
+            logger.info(f"数据库表就绪 ({self.db_type})")
         except Exception as e:
-            logger.error(f"数据库表创建失败: {e}")
-            raise
+            # 忽略"表已存在"相关的错误
+            if "already exists" in str(e) or "duplicate key" in str(e):
+                logger.debug(f"表已存在，跳过创建 ({self.db_type})")
+            else:
+                logger.error(f"数据库表创建失败: {e}")
+                raise
 
     def drop_tables(self):
         """删除所有表"""
