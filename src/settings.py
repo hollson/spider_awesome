@@ -43,6 +43,21 @@ class Settings:
     HTTP_PROXY: str | None = os.getenv("HTTP_PROXY") or None
     HTTPS_PROXY: str | None = os.getenv("HTTPS_PROXY") or None
 
+    # ========== 代理池 ==========
+    PROXY_POOL_ENABLED: bool = os.getenv("PROXY_POOL_ENABLED", "false").lower() == "true"
+    PROXY_POOL_LIST: str = os.getenv("PROXY_POOL_LIST", "")  # 用 | 分隔多个代理
+    PROXY_POOL_STRATEGY: str = os.getenv("PROXY_POOL_STRATEGY", "random")  # random/round_robin/least_used
+
+    # ========== 请求间隔控制（防反爬）==========
+    # 注意：这是每次 HTTP 请求的间隔，分页采集会累积延迟，严重影响效率
+    # 建议：默认禁用（MIN=MAX=0），只在遇到反爬时按需开启
+    REQUEST_DELAY_MIN: int = int(os.getenv("REQUEST_DELAY_MIN", "0"))  # 毫秒
+    REQUEST_DELAY_MAX: int = int(os.getenv("REQUEST_DELAY_MAX", "0"))  # 毫秒
+
+    # ========== 浏览器渲染 ==========
+    BROWSER_HEADLESS: bool = os.getenv("BROWSER_HEADLESS", "true").lower() == "true"
+    BROWSER_TIMEOUT: int = int(os.getenv("BROWSER_TIMEOUT", "30000"))  # 毫秒
+
     # ========== 日志 ==========
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_FILE: str = os.getenv("LOG_FILE", "var/logs/spider_awesome.log")

@@ -20,6 +20,8 @@
 - 🔄 **Controlled Concurrency**: Thread pool parallel collection with retry and timeout protection
 - 🌍 **Environment Isolation**: dev / test / prod configs; zero-code switching
 - 🛡️ **Robustness**: Graceful degradation, log-level control, and auto-retry for unattended operation
+- 🎭 **Anti-Scraping Protection**: Proxy pool rotation, User-Agent rotation, request delay control
+- 🌐 **JS Rendering**: Dynamic page collection with Playwright, built-in stealth mode
 
 
 <br/>
