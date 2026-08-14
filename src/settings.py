@@ -41,7 +41,7 @@ class Settings:
 
     # ========== 代理 ==========
     PROXY_POOL_API: str | None = os.getenv("PROXY_POOL_API") or None  # 代理 API 地址
-    PROXY_POOL_LIST: str = os.getenv("PROXY_POOL_LIST", "")  # 用 | 分隔：单个=静态，多个=轮换，空=直连
+    PROXY_POOL_LIST: str = os.getenv("PROXY_POOL_LIST", "")  # 自定义代理池：一个=静态，多个=轮换，空=直连
     PROXY_POOL_STRATEGY: str = os.getenv("PROXY_POOL_STRATEGY", "random")  # random/round_robin/least_used
 
     # ========== 请求间隔控制（防反爬）==========

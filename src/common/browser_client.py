@@ -7,6 +7,8 @@ Playwright 浏览器客户端
   playwright install chromium
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from src.common.logger import logger
@@ -47,20 +49,19 @@ class BrowserClient:
         self.user_agent = user_agent
         self.viewport = viewport or {"width": 1920, "height": 1080}
         self.timeout = timeout
-        self._playwright = None
-        self._browser = None
+        self._playwright: Any = None
+        self._browser: Any = None
 
     def _ensure_playwright(self) -> None:
         """确保 Playwright 已启动"""
         if self._playwright is None:
             try:
-                from playwright.sync_api import sync_playwright
+                from playwright.sync_api import sync_playwright  # type: ignore[import-untyped]
+
                 self._playwright = sync_playwright().start()
                 logger.debug("[Browser] Playwright 已启动")
             except ImportError as err:
-                raise ImportError(
-                    "请安装 playwright: pip install playwright && playwright install chromium"
-                ) from err
+                raise ImportError("请安装 playwright: pip install playwright && playwright install chromium") from err
 
     def _ensure_browser(self) -> None:
         """确保浏览器已启动"""
@@ -217,18 +218,19 @@ class BrowserClient:
         try:
             # 设置请求拦截
             if intercept_urls:
+
                 def handle_route(route):
                     request = route.request
                     # 检查是否需要拦截
-                    should_intercept = any(
-                        pattern in request.url for pattern in intercept_urls
-                    )
+                    should_intercept = any(pattern in request.url for pattern in intercept_urls)
                     if should_intercept:
-                        intercepted_data.append({
-                            "url": request.url,
-                            "method": request.method,
-                            "headers": request.headers,
-                        })
+                        intercepted_data.append(
+                            {
+                                "url": request.url,
+                                "method": request.method,
+                                "headers": request.headers,
+                            }
+                        )
                     route.continue_()
 
                 page.route("**/*", handle_route)
@@ -299,7 +301,7 @@ class BrowserClient:
         except Exception as e:
             logger.warning(f"[Browser] 关闭时出错: {e}")
 
-    def __enter__(self) -> "BrowserClient":
+    def __enter__(self) -> BrowserClient:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

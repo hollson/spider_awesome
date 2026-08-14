@@ -5,9 +5,8 @@
 
 代理模式（优先级从高到低）：
 1. API 代理：PROXY_POOL_API 从 API 动态获取
-2. 手动代理池：PROXY_POOL_LIST 配置多个代理轮换
-3. 静态代理：PROXY_POOL_LIST 配置单个代理
-4. 直连：无代理配置
+2. 自定义代理池：PROXY_POOL_LIST 一个=静态，多个=轮换
+3. 直连：无代理配置
 """
 
 import random
@@ -55,14 +54,15 @@ class HttpClient:
         self._pool_proxies = [p.strip() for p in pool_list.split("|") if p.strip()] if pool_list else None
 
         # 代理模式判断：有多个代理 → 轮换；单个 → 静态；无 → 直连
-        self._use_proxy_pool = (
-            (use_proxy_pool if use_proxy_pool is not None else bool(self._pool_proxies))
-            and bool(self._pool_proxies and len(self._pool_proxies) > 1)
+        self._use_proxy_pool = (use_proxy_pool if use_proxy_pool is not None else bool(self._pool_proxies)) and bool(
+            self._pool_proxies and len(self._pool_proxies) > 1
         )
         # UA 轮换始终开启
         self._use_ua_rotation = use_ua_rotation if use_ua_rotation is not None else True
         # 请求间隔：通过 min/max 是否相等判断是否启用（相等=禁用）
-        self._use_delay = use_delay if use_delay is not None else (settings.REQUEST_DELAY_MIN != settings.REQUEST_DELAY_MAX)
+        self._use_delay = (
+            use_delay if use_delay is not None else (settings.REQUEST_DELAY_MIN != settings.REQUEST_DELAY_MAX)
+        )
         self._current_proxy = None
 
         # 配置重试策略
@@ -88,7 +88,9 @@ class HttpClient:
         self._setup_default_headers()
 
         # 日志
-        if self._use_proxy_pool:
+        if settings.PROXY_POOL_API:
+            logger.debug("[HTTP] 代理模式: API 动态获取")
+        elif self._use_proxy_pool and self._pool_proxies:
             logger.debug(f"[HTTP] 代理模式: 代理池 ({len(self._pool_proxies)} 个代理)")
         elif self._current_proxy:
             logger.debug("[HTTP] 代理模式: 静态代理")
@@ -99,6 +101,7 @@ class HttpClient:
         """设置默认请求头（支持 UA 轮换）"""
         if self._use_ua_rotation:
             from src.common.user_agent import get_ua_manager
+
             ua_manager = get_ua_manager()
             user_agent = ua_manager.get_random()
         else:
@@ -113,15 +116,20 @@ class HttpClient:
         )
 
     def _get_proxy_from_pool(self) -> dict[str, str] | None:
-        """从代理池获取代理"""
-        if not self._use_proxy_pool or not self._pool_proxies:
-            return None
-
+        """从代理池获取代理（支持 API 动态获取）"""
         from src.common.proxy_pool import get_proxy_pool
+
+        # 有 API 配置或手动配置 → 使用代理池
+        has_api = bool(settings.PROXY_POOL_API)
+        has_list = bool(self._pool_proxies)
+
+        if not has_api and not has_list:
+            return None
 
         pool = get_proxy_pool(
             proxies=self._pool_proxies,
             strategy=settings.PROXY_POOL_STRATEGY,
+            api_url=settings.PROXY_POOL_API,
         )
         return pool.get_proxy()
 
@@ -142,6 +150,7 @@ class HttpClient:
         """应用 UA 轮换"""
         if self._use_ua_rotation:
             from src.common.user_agent import get_ua_manager
+
             ua_manager = get_ua_manager()
             self.session.headers["User-Agent"] = ua_manager.get_random()
 
@@ -158,6 +167,7 @@ class HttpClient:
         """报告代理使用成功"""
         if self._use_proxy_pool and self._current_proxy:
             from src.common.proxy_pool import get_proxy_pool
+
             pool = get_proxy_pool(proxies=self._pool_proxies)
             pool.report_success(self._current_proxy)
 
@@ -165,6 +175,7 @@ class HttpClient:
         """报告代理使用失败"""
         if self._use_proxy_pool and self._current_proxy:
             from src.common.proxy_pool import get_proxy_pool
+
             pool = get_proxy_pool(proxies=self._pool_proxies)
             pool.report_failure(self._current_proxy)
 

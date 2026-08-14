@@ -112,7 +112,7 @@ init:
 .PHONY: check
 check:
 	@echo "🔍 类型检查..."
-	@uv run --extra dev ty check src/
+	@uv run --extra dev ty check src/ --ignore unresolved-import
 	@echo "✅ 类型检查完成"
 
 

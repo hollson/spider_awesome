@@ -238,20 +238,18 @@ class DataStorage(BaseRecordStorage):
     def query(
         self,
         source: str | None = None,
-        origin_code: str | None = None,
-        dest_code: str | None = None,
         limit: int = 100,
         offset: int = 0,
+        **kwargs: Any,
     ) -> list[dict[str, Any]]:
         """
         查询航空业务数据
 
         Args:
             source: 数据来源
-            origin_code: 出发地编码
-            dest_code: 目的地编码
             limit: 返回数量限制
             offset: 偏移量
+            **kwargs: 额外筛选条件（origin_code, dest_code）
 
         Returns:
             数据列表
@@ -261,10 +259,10 @@ class DataStorage(BaseRecordStorage):
 
             if source:
                 query = query.filter(DataRecord.source == source)
-            if origin_code:
-                query = query.filter(DataRecord.origin_code == origin_code)
-            if dest_code:
-                query = query.filter(DataRecord.dest_code == dest_code)
+            if "origin_code" in kwargs and kwargs["origin_code"]:
+                query = query.filter(DataRecord.origin_code == kwargs["origin_code"])
+            if "dest_code" in kwargs and kwargs["dest_code"]:
+                query = query.filter(DataRecord.dest_code == kwargs["dest_code"])
 
             records = query.order_by(DataRecord.create_time.desc()).offset(offset).limit(limit).all()
             return [r.to_dict() for r in records]
