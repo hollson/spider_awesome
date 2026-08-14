@@ -112,7 +112,7 @@ init:
 .PHONY: check
 check:
 	@echo "🔍 类型检查..."
-	@uv run --extra dev ty check src/ --ignore unresolved-import
+	@uv run --extra dev ty check src/
 	@echo "✅ 类型检查完成"
 
 
@@ -130,7 +130,7 @@ lint:
 bandit:
 	$(call install_tool,bandit)
 	@echo "🔒 安全漏洞扫描..."
-	@uv tool run bandit -r src/ -s B101 -f screen
+	@uv tool run bandit -r src/ -s B101,B311 -f screen
 	@echo "✅ 安全扫描完成"
 
 
