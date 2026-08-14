@@ -11,6 +11,7 @@
 - 无需关心数据是否重复
 """
 
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func
@@ -19,6 +20,13 @@ from src.common.logger import logger
 from src.storage.base_storage import BaseStorage
 from src.storage.models import BaseRecord, DataRecord
 from src.storage.session import get_db_instance
+
+
+def _same_value(a: Any, b: Any) -> bool:
+    """比较两个字段值是否一致（datetime 忽略时区差异）"""
+    if isinstance(a, datetime) and isinstance(b, datetime):
+        return a.replace(tzinfo=None) == b.replace(tzinfo=None)
+    return a == b
 
 
 class BaseRecordStorage(BaseStorage):
@@ -161,14 +169,44 @@ class DataStorage(BaseRecordStorage):
             records: 待保存的数据列表
 
         Returns:
-            成功保存的数量
+            成功保存的数量（新增 + 更新）
         """
         if not records:
             return 0
+        inserted, updated, _skipped = self.save_with_counts(records)
+        return inserted + updated
+
+    UPDATABLE_FIELDS = (
+        "title",
+        "description",
+        "raw_data",
+        "extra",
+        "start_time",
+        "end_time",
+        "take_off_time",
+        "flight_cost",
+        "seats",
+    )
+
+    def save_with_counts(self, records: list[dict[str, Any]]) -> tuple[int, int, int]:
+        """
+        保存航空业务数据并返回 (新增, 更新, 跳过) 统计
+
+        已存在且内容未变化的记录跳过不写库，不刷新 update_time
+
+        Args:
+            records: 待保存的数据列表
+
+        Returns:
+            (inserted, updated, skipped) 元组
+        """
+        if not records:
+            return 0, 0, 0
 
         logger.info(f"[Storage] 开始保存 {len(records)} 条数据")
         saved_count = 0
         updated_count = 0
+        skipped_count = 0
 
         with get_db_instance().get_session() as session:
             for record in records:
@@ -180,7 +218,17 @@ class DataStorage(BaseRecordStorage):
                     # 检查是否已存在
                     existing = session.query(DataRecord).filter_by(id=record_id).first()
                     if existing:
-                        # 已存在 → 更新（只更新可变字段）
+                        # 内容未变化 → 跳过，不写库
+                        changed = any(
+                            field in record and not _same_value(getattr(existing, field), record[field])
+                            for field in self.UPDATABLE_FIELDS
+                        )
+                        if not changed:
+                            skipped_count += 1
+                            logger.debug(f"记录未变化，跳过: {record_id}")
+                            continue
+
+                        # 已存在且内容有变化 → 更新（只更新可变字段）
                         existing.title = record.get("title", existing.title)
                         existing.description = record.get("description", existing.description)
                         existing.raw_data = record.get("raw_data", existing.raw_data)
@@ -229,11 +277,11 @@ class DataStorage(BaseRecordStorage):
 
             session.commit()
 
-        if updated_count > 0:
-            logger.info(f"[Storage] 保存完成: 新增 {saved_count} 条, 更新 {updated_count} 条")
-        else:
-            logger.info(f"[Storage] 保存完成: 新增 {saved_count} 条")
-        return saved_count + updated_count
+        parts = [f"新增 {saved_count} 条", f"更新 {updated_count} 条"]
+        if skipped_count > 0:
+            parts.append(f"跳过 {skipped_count} 条")
+        logger.info(f"[Storage] 保存完成: {', '.join(parts)}")
+        return saved_count, updated_count, skipped_count
 
     def query(
         self,

@@ -27,7 +27,7 @@ def run_collector(collector_name: str) -> dict[str, Any]:
 
     logger.info(f"[Task] 开始采集: {collector_name}")
     start_time = datetime.now()
-    result = {"total": 0, "success": 0, "failed": 0}
+    result = {"total": 0, "success": 0, "failed": 0, "inserted": 0, "updated": 0, "skipped": 0}
 
     # 获取采集器配置
     schedule = get_collector_schedule(collector_name)
@@ -48,15 +48,24 @@ def run_collector(collector_name: str) -> dict[str, Any]:
         records = validator.process(records)
 
         # 4. 存储（根据配置决定是否入库）
+        inserted = 0
+        updated = 0
+        skipped = 0
         if persist:
             storage = DataStorage(auto_create=True)
-            saved = storage.save(records)
-            result["success"] = saved
-            result["failed"] = len(records) - saved
+            inserted, updated, skipped = storage.save_with_counts(records)
+            result["success"] = inserted + updated
+            result["failed"] = len(records) - inserted - updated - skipped
+            result["inserted"] = inserted
+            result["updated"] = updated
+            result["skipped"] = skipped
         else:
             # 不入库，只统计通过校验的数量
             result["success"] = len(records)
             result["failed"] = 0
+            result["inserted"] = 0
+            result["updated"] = 0
+            result["skipped"] = 0
             logger.info(f"[Task] {collector_name} 不入库模式，跳过存储")
 
         elapsed = (datetime.now() - start_time).total_seconds()
@@ -134,7 +143,7 @@ def run_all_collectors() -> dict[str, Any]:
     print("🚀 开始串行采集...")
 
     collectors = list_enabled_collectors()
-    total_result = {"total": 0, "success": 0, "failed": 0}
+    total_result = {"total": 0, "success": 0, "failed": 0, "inserted": 0, "updated": 0, "skipped": 0}
 
     for i, name in enumerate(collectors, 1):
         print(f"  [{i}/{len(collectors)}] {name}...", end=" ", flush=True)
@@ -143,6 +152,9 @@ def run_all_collectors() -> dict[str, Any]:
             total_result["total"] += result["total"]
             total_result["success"] += result["success"]
             total_result["failed"] += result["failed"]
+            total_result["inserted"] += result["inserted"]
+            total_result["updated"] += result["updated"]
+            total_result["skipped"] += result["skipped"]
             print(f"✓ ({result['total']}条)")
         except Exception:
             print("✗ 失败")
@@ -170,7 +182,7 @@ def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[st
 
     print(f"🚀 开始并行采集: {', '.join(collector_names)}")
 
-    total_result = {"total": 0, "success": 0, "failed": 0}
+    total_result = {"total": 0, "success": 0, "failed": 0, "inserted": 0, "updated": 0, "skipped": 0}
 
     with ThreadPoolExecutor(max_workers=settings.MAX_WORKERS) as executor:
         futures = {executor.submit(run_collector, name): name for name in collector_names}
@@ -181,6 +193,9 @@ def run_parallel_collectors(collector_names: list[str] | None = None) -> dict[st
                 total_result["total"] += result["total"]
                 total_result["success"] += result["success"]
                 total_result["failed"] += result["failed"]
+                total_result["inserted"] += result["inserted"]
+                total_result["updated"] += result["updated"]
+                total_result["skipped"] += result["skipped"]
                 print(f"  ✓ {name} ({result['total']}条)")
             except Exception:
                 print(f"  ✗ {name} 失败")

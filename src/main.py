@@ -66,8 +66,10 @@ def cmd_run_all(args):
     print(f"\n{'=' * 50}")
     print("✅ 采集完成！")
     print(f"   总计: {result['total']} 条")
-    print(f"   新增: {result['success']} 条")
-    print(f"   去重: {result['failed']} 条")
+    print(f"   新增: {result['inserted']} 条")
+    print(f"   更新: {result['updated']} 条")
+    print(f"   跳过: {result['skipped']} 条")
+    print(f"   失败: {result['failed']} 条")
     print(f"{'=' * 50}\n")
 
 
@@ -85,8 +87,10 @@ def cmd_run_parallel(args):
     print(f"\n{'=' * 50}")
     print("✅ 并行采集完成！")
     print(f"   总计: {result['total']} 条")
-    print(f"   新增: {result['success']} 条")
-    print(f"   去重: {result['failed']} 条")
+    print(f"   新增: {result['inserted']} 条")
+    print(f"   更新: {result['updated']} 条")
+    print(f"   跳过: {result['skipped']} 条")
+    print(f"   失败: {result['failed']} 条")
     print(f"{'=' * 50}\n")
 
 
@@ -218,6 +222,20 @@ def cmd_status(args):
         )
 
 
+def _disp_len(text: str) -> int:
+    """估算终端显示宽度：全角/中文/Emoji 按 2 列计算"""
+    import unicodedata
+
+    return sum(
+        2 if unicodedata.east_asian_width(ch) in ("W", "F", "A") else 1 for ch in text
+    )
+
+
+def _pad(text: str, width: int) -> str:
+    """按显示宽度右补空格，保证 CJK/Emoji 对齐"""
+    return text + " " * max(width - _disp_len(text), 0)
+
+
 def cmd_logs(args):
     """查看采集审计日志"""
     from datetime import datetime, timedelta
@@ -258,18 +276,26 @@ def cmd_logs(args):
         print(f"\n最近 {hours} 小时内无采集记录")
         return
 
+    header = ["时间", "采集器", "状态", "数据量", "耗时"]
+    widths = [16, 17, 12, 8, 10]
+    sep = "-" * (2 + sum(widths))
+
     print(f"\n采集审计日志 (最近 {hours} 小时，共 {len(logs)} 条):")
-    print("-" * 80)
-    print(f"  {'时间':<20} {'采集器':<15} {'状态':<10} {'数据量':<10} {'耗时':<10}")
-    print("-" * 80)
+    print(sep)
+    print("  " + "".join(_pad(h, w) for h, w in zip(header, widths, strict=True)))
+    print(sep)
 
     for log in logs:
         status_icon = "✅" if log["status"] == "success" else "❌"
         time_str = log["created_at"].strftime("%m-%d %H:%M:%S") if log["created_at"] else "-"
-        print(
-            f"  {time_str:<20} {log['collector_name']:<15} "
-            f"{status_icon} {log['status']:<8} {log['data_count']:<10} {log['duration'] or 0:.1f}s"
-        )
+        cells = [
+            time_str,
+            log["collector_name"],
+            f"{status_icon} {log['status']}",
+            str(log["data_count"]),
+            f"{log['duration'] or 0:.1f}s",
+        ]
+        print("  " + "".join(_pad(c, w) for c, w in zip(cells, widths, strict=True)))
 
     print()
 

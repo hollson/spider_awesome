@@ -1,6 +1,11 @@
 """
-示例采集器1: Alerion
+示例采集器1: Alerion（Alerion Aviation）
 演示 POST JSON API 采集方式
+
+Alerion Aviation 是一家美国公务机包机运营商（总部位于纽约），
+主营私人包机、飞机管理与飞行部运营业务。本采集器对接其
+空退航班（Empty Legs）报价数据：由 Tuvoli 报价引擎
+（widgets-ecs.tuvoli.com / flyeasy.co）提供，POST JSON 请求。
 
 注意：这是一个示例采集器，衍生项目可参考或删除
 """

@@ -1,6 +1,11 @@
 """
-示例采集器: LuxAviation
+示例采集器: LuxAviation（Luxaviation）
 演示 POST JSON API 分页采集方式
+
+Luxaviation 是一家卢森堡的全球公务航空集团，为全球最大的
+公务机运营商之一（luxaviation.com）。本采集器对接其官网
+空退航班（Empty Legs）接口（lms-api.luxaviation.com），
+POST JSON 请求、分页采集。
 
 数据源: https://www.luxaviation.com/jets/jet-charter/empty-legs/
 API: https://lms-api.luxaviation.com/ext-lead/load-emptylegs

@@ -60,30 +60,32 @@ scheduler:
 
 collectors:
   # ----- 示例采集器（衍生项目可参考或删除）-----
+  # Alerion（Alerion Aviation，美国公务机包机商）
   example_alerion:
     enabled: true
     cron: "0 */2 * * *"        # 每 2 小时
     persist: true
 
+  # ASL（ASL Group，比利时公务航空集团）
   example_asl:
     enabled: true
     cron: "30 0 * * *"         # 每天 00:30
     timeout: 600
     persist: true
 
-  # LuxAviation - POST JSON API 分页采集（数据量最大）
+  # LuxAviation（卢森堡全球公务航空集团）- POST JSON API 分页采集（数据量最大）
   example_lux:
     enabled: true
     cron: "0 */3 * * *"        # 每 3 小时
     persist: true
 
-  # Silver - HTML 卡片解析采集
+  # Silver（Silverhawk Aviation，美国公务机运营商）- HTML 卡片解析采集
   example_silver:
     enabled: true
     cron: "0 */4 * * *"        # 每 4 小时
     persist: true
 
-  # ChartRight - HTML 卡片解析采集
+  # ChartRight（Chartright Air Group，加拿大包机公司）- HTML 卡片解析采集
   example_chartright:
     enabled: true
     cron: "30 */2 * * *"       # 每 2 小时半点

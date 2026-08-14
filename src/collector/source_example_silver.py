@@ -1,6 +1,10 @@
 """
-示例采集器: Silver
+示例采集器: Silver（Silverhawk Aviation）
 演示 HTML 页面解析采集方式
+
+Silverhawk Aviation 是一家美国公务机运营商（总部位于内布拉斯加州林肯市），
+主营包机、飞机管理与维护。本采集器解析其空退航班（Empty Legs）
+小部件页面（portal.silverhawkaviation.com FlightWidget）中的 HTML 卡片。
 
 数据源: https://silverhawkaviation.com/empty-leg-flights/
 特点: 解析 HTML 卡片结构，提取航班信息

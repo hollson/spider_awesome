@@ -1,6 +1,10 @@
 """
-示例采集器: ChartRight
+示例采集器: ChartRight（Chartright Air Group）
 演示 HTML 页面解析采集方式
+
+Chartright Air Group 是一家加拿大公务机包机公司（多伦多，chartright.com），
+提供包机、飞机管理与维修服务，报价币种为 CAD。
+本采集器解析其空退航班（Empty Legs）页面，提取 HTML 卡片中的航班信息。
 
 数据源: https://chartright.com/empty-legs/
 特点: 解析 HTML 卡片结构，提取航班信息

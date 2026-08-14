@@ -4,16 +4,13 @@
 """
 
 import time
-from unittest.mock import patch, MagicMock
-
-import pytest
+from unittest.mock import patch
 
 from src.collector.source_example import (
-    ExampleSlowCollector,
-    ExampleMediumCollector,
     ExampleFastCollector,
+    ExampleMediumCollector,
+    ExampleSlowCollector,
 )
-
 
 # 模拟采集器配置：name -> collector_class
 MOCK_COLLECTORS = {
@@ -37,8 +34,8 @@ def _mock_list_collectors():
 
 
 def _mock_save(records):
-    """模拟存储层：直接返回记录数"""
-    return len(records)
+    """模拟存储层：全部新增"""
+    return len(records), 0, 0
 
 
 class TestParallelExecution:
@@ -49,7 +46,7 @@ class TestParallelExecution:
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_faster_than_serial(self, mock_list, mock_get, mock_storage_cls):
         """并行执行总耗时应远小于串行执行"""
-        mock_storage_cls.return_value.save.side_effect = _mock_save
+        mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
         from src.scheduler.tasks import run_parallel_collectors
 
@@ -75,7 +72,7 @@ class TestParallelExecution:
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_subset_collectors(self, mock_list, mock_get, mock_storage_cls):
         """并行执行指定采集器子集"""
-        mock_storage_cls.return_value.save.side_effect = _mock_save
+        mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
         from src.scheduler.tasks import run_parallel_collectors
 
@@ -95,7 +92,7 @@ class TestParallelExecution:
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_single_collector(self, mock_list, mock_get, mock_storage_cls):
         """单个采集器并行执行（退化为串行）"""
-        mock_storage_cls.return_value.save.side_effect = _mock_save
+        mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
         from src.scheduler.tasks import run_parallel_collectors
 
@@ -112,7 +109,7 @@ class TestParallelExecution:
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_partial_failure(self, mock_list, mock_get, mock_storage_cls):
         """并行执行中部分采集器失败不影响其他"""
-        mock_storage_cls.return_value.save.side_effect = _mock_save
+        mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
         from src.scheduler.tasks import run_parallel_collectors
 
@@ -133,7 +130,7 @@ class TestParallelExecution:
     @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_result_structure(self, mock_list, mock_get, mock_storage_cls):
         """验证返回结果结构正确"""
-        mock_storage_cls.return_value.save.side_effect = _mock_save
+        mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
         from src.scheduler.tasks import run_parallel_collectors
 
