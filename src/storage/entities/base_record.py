@@ -8,7 +8,8 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import JSON, Column, DateTime, Index, SmallInteger, String, Text
+from sqlalchemy import JSON, DateTime, Index, SmallInteger, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.storage.entities.base import Base
 
@@ -24,27 +25,29 @@ class BaseRecord(Base):
     __tablename__ = "base_records"
 
     # 主键
-    id = Column(String(64), primary_key=True, comment="数据唯一标识（MD5）")
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, comment="数据唯一标识（MD5）")
 
     # 来源信息
-    source = Column(String(50), nullable=False, index=True, comment="数据来源")
-    collector_name = Column(String(50), nullable=False, comment="采集器名称")
+    source: Mapped[str] = mapped_column(String(50), nullable=False, index=True, comment="数据来源")
+    collector_name: Mapped[str] = mapped_column(String(50), nullable=False, comment="采集器名称")
 
     # 核心字段
-    title = Column(String(200), comment="标题")
-    description = Column(Text, comment="描述")
-    url = Column(String(500), comment="数据源 URL")
+    title: Mapped[str | None] = mapped_column(String(200), comment="标题")
+    description: Mapped[str | None] = mapped_column(Text, comment="描述")
+    url: Mapped[str | None] = mapped_column(String(500), comment="数据源 URL")
 
     # 扩展字段（JSON 格式，存储业务特定数据）
-    raw_data = Column(JSON, comment="原始数据（JSON）")
-    extra = Column(JSON, comment="扩展字段（业务特定数据）")
+    raw_data: Mapped[Any | None] = mapped_column(JSON, comment="原始数据（JSON）")
+    extra: Mapped[Any | None] = mapped_column(JSON, comment="扩展字段（业务特定数据）")
 
     # 状态字段
-    status = Column(SmallInteger, default=0, comment="数据状态 (0:正常, 1:删除)")
+    status: Mapped[int | None] = mapped_column(SmallInteger, default=0, comment="数据状态 (0:正常, 1:删除)")
 
     # 时间戳
-    create_time = Column(DateTime(timezone=True), default=_utcnow, comment="创建时间")
-    update_time = Column(DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, comment="更新时间")
+    create_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=_utcnow, comment="创建时间")
+    update_time: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, comment="更新时间"
+    )
 
     # 索引
     __table_args__ = (Index("idx_source_create", "source", "create_time"),)

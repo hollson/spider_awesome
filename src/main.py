@@ -6,6 +6,7 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 # 确保项目根目录在 Python 路径中
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -260,7 +261,7 @@ def cmd_logs(args):
             query = query.filter(CollectLog.collector_name == collector)
 
         # 按时间倒序，转换为字典列表
-        logs = [
+        logs: list[dict[str, Any]] = [
             {
                 "collector_name": log.collector_name,
                 "status": log.status,
