@@ -3,10 +3,11 @@
 支持重试、代理、超时、指数退避
 支持代理池轮换、User-Agent 轮换、请求间隔控制
 
-代理逻辑：
-- 优先级：构造参数 > 代理池 > 静态代理
-- 代理池启用且有配置 → 使用代理池轮换
-- 代理池未启用或无配置 → 使用静态代理（HTTP_PROXY/HTTPS_PROXY）
+代理模式（优先级从高到低）：
+1. API 代理：PROXY_POOL_API 从 API 动态获取
+2. 手动代理池：PROXY_POOL_LIST 配置多个代理轮换
+3. 静态代理：PROXY_POOL_LIST 配置单个代理
+4. 直连：无代理配置
 """
 
 import random
@@ -53,11 +54,10 @@ class HttpClient:
         pool_list = settings.PROXY_POOL_LIST
         self._pool_proxies = [p.strip() for p in pool_list.split("|") if p.strip()] if pool_list else None
 
-        # 保存配置
-        # 代理池逻辑：启用 且 有配置 → 用代理池；否则用静态代理
+        # 代理模式判断：有多个代理 → 轮换；单个 → 静态；无 → 直连
         self._use_proxy_pool = (
-            (use_proxy_pool if use_proxy_pool is not None else settings.PROXY_POOL_ENABLED)
-            and bool(self._pool_proxies)
+            (use_proxy_pool if use_proxy_pool is not None else bool(self._pool_proxies))
+            and bool(self._pool_proxies and len(self._pool_proxies) > 1)
         )
         # UA 轮换始终开启
         self._use_ua_rotation = use_ua_rotation if use_ua_rotation is not None else True

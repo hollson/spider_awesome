@@ -2,8 +2,7 @@
 代理池管理器
 支持多个代理轮换使用，自动检测代理有效性
 
-默认关闭，需在配置中启用：
-  PROXY_POOL_ENABLED=true
+配置方式：在 PROXY_POOL_LIST 中配置多个代理（用 | 分隔）
 """
 
 import random

@@ -40,12 +40,8 @@ class Settings:
     CACHE_DIR: str = os.getenv("CACHE_DIR", "var/cache")
 
     # ========== 代理 ==========
-    HTTP_PROXY: str | None = os.getenv("HTTP_PROXY") or None
-    HTTPS_PROXY: str | None = os.getenv("HTTPS_PROXY") or None
-
-    # ========== 代理池 ==========
-    PROXY_POOL_ENABLED: bool = os.getenv("PROXY_POOL_ENABLED", "false").lower() == "true"
-    PROXY_POOL_LIST: str = os.getenv("PROXY_POOL_LIST", "")  # 用 | 分隔多个代理
+    PROXY_POOL_API: str | None = os.getenv("PROXY_POOL_API") or None  # 代理 API 地址
+    PROXY_POOL_LIST: str = os.getenv("PROXY_POOL_LIST", "")  # 用 | 分隔：单个=静态，多个=轮换，空=直连
     PROXY_POOL_STRATEGY: str = os.getenv("PROXY_POOL_STRATEGY", "random")  # random/round_robin/least_used
 
     # ========== 请求间隔控制（防反爬）==========
@@ -74,14 +70,11 @@ class Settings:
 
     @property
     def PROXIES(self) -> dict | None:  # noqa: N802
-        """代理配置"""
-        if self.HTTP_PROXY or self.HTTPS_PROXY:
-            proxies = {}
-            if self.HTTP_PROXY:
-                proxies["http"] = self.HTTP_PROXY
-            if self.HTTPS_PROXY:
-                proxies["https"] = self.HTTPS_PROXY
-            return proxies
+        """代理配置（从 PROXY_POOL_LIST 读取第一个）"""
+        if self.PROXY_POOL_LIST:
+            proxies = self.PROXY_POOL_LIST.split("|")[0].strip()
+            if proxies:
+                return {"http": proxies, "https": proxies}
         return None
 
     @property

@@ -3,7 +3,7 @@ SQLAlchemy ORM 数据模型（聚合导出）
 
 实体已拆分到 storage/entities/ 目录下：
 - entities/base.py          → Base 声明
-- entities/base_record.py   → BaseRecord（通用表）
+- entities/base_record.py   → BaseRecord（通用表，支持 upsert）
 - entities/data_record.py   → DataRecord（航空业务表）
 - entities/collector_task.py → CollectorTask（任务记录表）
 - entities/collect_log.py   → CollectLog（审计日志表）
