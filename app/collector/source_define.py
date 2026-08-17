@@ -50,24 +50,24 @@ class SourceMeta:
     """数据源完整定义"""
 
     # ---- 基本信息 ----
-    name: str                         # 唯一标识（必须与 source_*.py 对应）
-    display_name: str                 # 显示名称
-    source_type: SourceType           # 数据源类型
-    description: str = ""             # 说明
-    url: str = ""                     # 数据源地址
-    operator_id: str = ""             # 运营商 ID（可选）
+    name: str  # 唯一标识（必须与 source_*.py 对应）
+    display_name: str  # 显示名称
+    source_type: SourceType  # 数据源类型
+    description: str = ""  # 说明
+    url: str = ""  # 数据源地址
+    operator_id: str = ""  # 运营商 ID（可选）
 
     # ---- 调度配置 ----
-    enabled: bool = True              # 是否启用
-    cron: str = "0 */1 * * *"         # 默认每小时一次
-    timeout: int = 300                # 超时（秒）
-    retry: int = 3                    # 重试次数
-    retry_delay: int = 60             # 重试间隔（秒）
-    persist: bool = True              # 是否入库
+    enabled: bool = True  # 是否启用
+    cron: str = "0 */1 * * *"  # 默认每小时一次
+    timeout: int = 300  # 超时（秒）
+    retry: int = 3  # 重试次数
+    retry_delay: int = 60  # 重试间隔（秒）
+    persist: bool = True  # 是否入库
 
     # ---- 示例 ----
     example_output: dict | None = field(default=None, repr=False)  # 示例数据结构
-    example_notes: str = ""           # 示例说明
+    example_notes: str = ""  # 示例说明
 
 
 # ============================================================
@@ -76,11 +76,9 @@ class SourceMeta:
 # 新增数据源：在下方添加 SourceMeta 即可
 
 SOURCES: dict[str, SourceMeta] = {
-
     # ==================================================================
     # 航空数据（示例）
     # ==================================================================
-
     # Alerion（Alerion Aviation，美国公务机包机商）
     # POST JSON API 采集
     "example_alerion": SourceMeta(
@@ -103,7 +101,6 @@ SOURCES: dict[str, SourceMeta] = {
         },
         example_notes="API 返回 flights.departing 数组",
     ),
-
     # ASL（ASL Group，比利时公务航空集团）
     # HTML 分页采集
     "example_asl": SourceMeta(
@@ -116,7 +113,6 @@ SOURCES: dict[str, SourceMeta] = {
         cron="30 0 * * *",
         timeout=600,
     ),
-
     # LuxAviation（卢森堡全球公务航空集团）
     # POST JSON API 分页采集（数据量最大，200+条）
     "example_lux": SourceMeta(
@@ -128,7 +124,6 @@ SOURCES: dict[str, SourceMeta] = {
         operator_id="804d5f81fee1458dbf5140679f60c65c",
         cron="0 */3 * * *",
     ),
-
     # Silver（Silverhawk Aviation，美国公务机运营商）
     # HTML 卡片解析采集（190+条）
     "example_silver": SourceMeta(
@@ -140,7 +135,6 @@ SOURCES: dict[str, SourceMeta] = {
         operator_id="a081e1cc46c64ad39f88b14de6b4ecf6",
         cron="0 */4 * * *",
     ),
-
     # ChartRight（Chartright Air Group，加拿大包机公司）
     # HTML 卡片解析采集（40+条）
     "example_chartright": SourceMeta(
@@ -152,14 +146,12 @@ SOURCES: dict[str, SourceMeta] = {
         operator_id="62a7050b3fb646c8b7011687ae7ed9a9",
         cron="30 */2 * * *",
     ),
-
     # ==================================================================
     # 并发模拟采集器（用于测试并发，不入库）
     # ==================================================================
     # 这三个采集器的唯一用途是验证 run_parallel_collectors 是否真正并行执行
     # 它们通过不同延迟（2s/1s/0.5s）模拟不同速度的网站
     # 串行执行需 3.5s，并行执行只需 ~2s（取决于最慢的那个）
-
     "example_slow": SourceMeta(
         name="example_slow",
         display_name="慢速模拟（2s）",
@@ -170,7 +162,6 @@ SOURCES: dict[str, SourceMeta] = {
         persist=True,
         timeout=30,
     ),
-
     "example_medium": SourceMeta(
         name="example_medium",
         display_name="中速模拟（1s）",
@@ -181,7 +172,6 @@ SOURCES: dict[str, SourceMeta] = {
         persist=True,
         timeout=30,
     ),
-
     "example_fast": SourceMeta(
         name="example_fast",
         display_name="快速模拟（0.5s）",

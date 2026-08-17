@@ -6,17 +6,17 @@
 import time
 from unittest.mock import patch
 
-from app.collector.source_example import (
-    ExampleFastCollector,
-    ExampleMediumCollector,
-    ExampleSlowCollector,
+from app.collector.source_resolve_example import (
+    FastResolver,
+    MediumResolver,
+    SlowResolver,
 )
 
 # 模拟采集器配置：name -> collector_class
 MOCK_COLLECTORS = {
-    "example_slow": ExampleSlowCollector,
-    "example_medium": ExampleMediumCollector,
-    "example_fast": ExampleFastCollector,
+    "example_slow": SlowResolver,
+    "example_medium": MediumResolver,
+    "example_fast": FastResolver,
 }
 
 

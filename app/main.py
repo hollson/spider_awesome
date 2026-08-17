@@ -227,9 +227,7 @@ def _disp_len(text: str) -> int:
     """估算终端显示宽度：全角/中文/Emoji 按 2 列计算"""
     import unicodedata
 
-    return sum(
-        2 if unicodedata.east_asian_width(ch) in ("W", "F", "A") else 1 for ch in text
-    )
+    return sum(2 if unicodedata.east_asian_width(ch) in ("W", "F", "A") else 1 for ch in text)
 
 
 def _pad(text: str, width: int) -> str:
@@ -329,14 +327,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  python src/main.py run --source=alerion         # 执行单个采集器
-  python src/main.py run-all                       # 执行所有采集器（串行）
-  python src/main.py run-all --dry-run             # 试运行（不保存）
-  python src/main.py run-parallel                  # 并行执行所有采集器
-  python src/main.py run-parallel --collectors=alerion,asl  # 并行指定采集器
-  python src/main.py scheduler                     # 启动定时调度
-  python src/main.py list                          # 列出所有采集器
-  python src/main.py status                        # 查看任务状态
+  python app/main.py run --source=example_alerion         # 执行单个采集器
+  python app/main.py run-all                       # 执行所有采集器（串行）
+  python app/main.py run-all --dry-run             # 试运行（不保存）
+  python app/main.py run-parallel                  # 并行执行所有采集器
+  python app/main.py run-parallel --collectors=example_alerion,example_asl  # 并行指定采集器
+  python app/main.py scheduler                     # 启动定时调度
+  python app/main.py list                          # 列出所有采集器
+  python app/main.py status                        # 查看任务状态
         """,
     )
 
