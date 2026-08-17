@@ -112,7 +112,7 @@ init:
 .PHONY: check
 check:
 	@echo "🔍 类型检查..."
-	@uv run --extra dev ty check src/
+	@uv run --extra dev ty check app/
 	@echo "✅ 类型检查完成"
 
 
@@ -121,7 +121,7 @@ check:
 lint: 
 	$(call install_tool,ruff)
 	@echo "🔍 代码检查..."
-	@uv tool run ruff check src/ --fix || true
+	@uv tool run ruff check app/ --fix || true
 	@echo "✅ 检查完成"
 
 
@@ -130,7 +130,7 @@ lint:
 bandit:
 	$(call install_tool,bandit)
 	@echo "🔒 安全漏洞扫描..."
-	@uv tool run bandit -r src/ -s B101,B311 -f screen
+	@uv tool run bandit -r app/ -s B101,B311 -f screen
 	@echo "✅ 安全扫描完成"
 
 
@@ -155,7 +155,7 @@ clean:
 run:
 	@echo "🚀 开发运行（串行）..."
 	@mkdir -p var && echo "dev" > var/.env_mode
-	@ENV_MODE=dev uv run python src/main.py run-all
+	@ENV_MODE=dev uv run python app/main.py run-all
 
 
 #HELP prod@生产运行（并行）
@@ -163,7 +163,7 @@ run:
 prod:
 	@echo "🚀 生产运行（并行）..."
 	@mkdir -p var && echo "prod" > var/.env_mode
-	@ENV_MODE=prod uv run python src/main.py run-parallel
+	@ENV_MODE=prod uv run python app/main.py run-parallel
 
 
 #HELP scheduler@生产运行（定时）
@@ -171,7 +171,7 @@ prod:
 scheduler:
 	@echo "⏰ 启动定时调度..."
 	@mkdir -p var && echo "prod" > var/.env_mode
-	@ENV_MODE=prod uv run python src/main.py scheduler
+	@ENV_MODE=prod uv run python app/main.py scheduler
 
 
 #HELP test@运行测试
@@ -180,20 +180,20 @@ test:
 	@echo "🧪 运行测试..."
 	@mkdir -p var && echo "test" > var/.env_mode
 	@mkdir -p var/coverage/data var/coverage/report
-	@ENV_MODE=test COVERAGE_FILE=var/coverage/data/.coverage uv run pytest tests/ -v --cov=src --cov-report=html:var/coverage/report/htmlcov --cov-report=xml:var/coverage/report/coverage.xml --cov-report=term-missing
+	@ENV_MODE=test COVERAGE_FILE=var/coverage/data/.coverage uv run pytest tests/ -v --cov=app --cov-report=html:var/coverage/report/htmlcov --cov-report=xml:var/coverage/report/coverage.xml --cov-report=term-missing
 	@echo "✅ 测试完成，报告位于 var/coverage/report/htmlcov/"
 
 
 #HELP status@任务状态
 .PHONY: status
 status:
-	@uv run python src/main.py status
+	@uv run python app/main.py status
 
 
 #HELP list@采集列表
 .PHONY: list
 list:
-	@uv run python src/main.py list
+	@uv run python app/main.py list
 
 
 #HELP logs@审计日志
@@ -202,7 +202,7 @@ logs:
 	@if [ -f var/.env_mode ]; then \
 		ENV=$$(cat var/.env_mode); \
 		echo "📋 查看审计日志 (环境: $$ENV)"; \
-		ENV_MODE=$$ENV uv run python src/main.py logs; \
+		ENV_MODE=$$ENV uv run python app/main.py logs; \
 	else \
 		echo "⚠️  未找到运行记录，请先执行 make run/make prod/make scheduler"; \
 	fi

@@ -118,8 +118,8 @@ $ make dev
 ==================================================
 
 12-01 00:47:34 INF __main__:cmd_run_all:63 开 始 执 行 所 有 采 集 任 务
-12-01 00:47:34 INF src.scheduler.tasks:run_all_collectors:82 [Task] 开 始 执 行 所 有 采 集 任 务
-12-01 19:47:34 INF src.scheduler.tasks:run_collector:28 [Task] 开 始 采 集 : example_alerion
+12-01 00:47:34 INF app.scheduler.tasks:run_all_collectors:82 [Task] 开 始 执 行 所 有 采 集 任 务
+12-01 19:47:34 INF app.scheduler.tasks:run_collector:28 [Task] 开 始 采 集 : example_alerion
 ```
 
 _更多内容，请查看[数据采集项目说明文档](docs/数据采集项目说明文档.md)_

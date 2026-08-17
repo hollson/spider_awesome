@@ -6,7 +6,7 @@
 import time
 from unittest.mock import patch
 
-from src.collector.source_example import (
+from app.collector.source_example import (
     ExampleFastCollector,
     ExampleMediumCollector,
     ExampleSlowCollector,
@@ -41,14 +41,14 @@ def _mock_save(records):
 class TestParallelExecution:
     """并行执行测试"""
 
-    @patch("src.scheduler.tasks.DataStorage")
-    @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
+    @patch("app.scheduler.tasks.DataStorage")
+    @patch("app.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
+    @patch("app.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_faster_than_serial(self, mock_list, mock_get, mock_storage_cls):
         """并行执行总耗时应远小于串行执行"""
         mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
-        from src.scheduler.tasks import run_parallel_collectors
+        from app.scheduler.tasks import run_parallel_collectors
 
         # 串行预估耗时: 2 + 1 + 0.5 = 3.5s
         serial_estimated = 2 + 1 + 0.5
@@ -67,14 +67,14 @@ class TestParallelExecution:
         assert result["success"] == 6
         assert result["failed"] == 0
 
-    @patch("src.scheduler.tasks.DataStorage")
-    @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
+    @patch("app.scheduler.tasks.DataStorage")
+    @patch("app.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
+    @patch("app.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_subset_collectors(self, mock_list, mock_get, mock_storage_cls):
         """并行执行指定采集器子集"""
         mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
-        from src.scheduler.tasks import run_parallel_collectors
+        from app.scheduler.tasks import run_parallel_collectors
 
         start = time.time()
         result = run_parallel_collectors(collector_names=["example_medium", "example_fast"])
@@ -87,14 +87,14 @@ class TestParallelExecution:
         assert result["total"] == 4
         assert result["success"] == 4
 
-    @patch("src.scheduler.tasks.DataStorage")
-    @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
+    @patch("app.scheduler.tasks.DataStorage")
+    @patch("app.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
+    @patch("app.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_single_collector(self, mock_list, mock_get, mock_storage_cls):
         """单个采集器并行执行（退化为串行）"""
         mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
-        from src.scheduler.tasks import run_parallel_collectors
+        from app.scheduler.tasks import run_parallel_collectors
 
         start = time.time()
         result = run_parallel_collectors(collector_names=["example_slow"])
@@ -104,35 +104,35 @@ class TestParallelExecution:
         assert 1.5 < elapsed < 3.0
         assert result["total"] == 2
 
-    @patch("src.scheduler.tasks.DataStorage")
-    @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
+    @patch("app.scheduler.tasks.DataStorage")
+    @patch("app.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
+    @patch("app.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_partial_failure(self, mock_list, mock_get, mock_storage_cls):
         """并行执行中部分采集器失败不影响其他"""
         mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
-        from src.scheduler.tasks import run_parallel_collectors
+        from app.scheduler.tasks import run_parallel_collectors
 
         def get_collector_with_error(name: str):
             if name == "example_slow":
                 raise RuntimeError("模拟采集失败")
             return _mock_get_collector(name)
 
-        with patch("src.scheduler.tasks.get_collector", side_effect=get_collector_with_error):
+        with patch("app.scheduler.tasks.get_collector", side_effect=get_collector_with_error):
             result = run_parallel_collectors()
 
         # slow 失败，medium(1条) + fast(3条) 成功
         assert result["total"] == 4
         assert result["success"] == 4
 
-    @patch("src.scheduler.tasks.DataStorage")
-    @patch("src.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
-    @patch("src.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
+    @patch("app.scheduler.tasks.DataStorage")
+    @patch("app.scheduler.tasks.get_collector", side_effect=_mock_get_collector)
+    @patch("app.scheduler.tasks.list_enabled_collectors", side_effect=_mock_list_collectors)
     def test_parallel_result_structure(self, mock_list, mock_get, mock_storage_cls):
         """验证返回结果结构正确"""
         mock_storage_cls.return_value.save_with_counts.side_effect = _mock_save
 
-        from src.scheduler.tasks import run_parallel_collectors
+        from app.scheduler.tasks import run_parallel_collectors
 
         result = run_parallel_collectors()
 

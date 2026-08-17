@@ -34,13 +34,13 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # 复制源码
-COPY src/ src/
+COPY app/ app/
 
 # 安装项目本身
 RUN uv sync --frozen --no-dev
 
 # 入口点: 使用 uv run 执行 Python 脚本
-ENTRYPOINT ["uv", "run", "python", "src/main.py"]
+ENTRYPOINT ["uv", "run", "python", "app/main.py"]
 
 # 默认命令: 定时调度模式 (可通过 docker run <image> <command> 覆盖)
 CMD ["scheduler"]
