@@ -44,9 +44,6 @@ venv.bak/
 .env.local
 configs/.env.local
 
-# 本地采集器配置（个人覆盖）
-configs/collectors.local.yml
-
 # var 目录（缓存、数据库、日志、临时文件）
 var/
 

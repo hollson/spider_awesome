@@ -24,7 +24,7 @@
   "0 0 * * 0"     → 每周日 00:00
 
 【采集器发现机制】
-  采集器自动扫描 src/collector/source_resolve_*.py 文件
+  采集器自动扫描 app/collector/source_resolve_*.py 文件
   - 文件名：source_resolve_{name}.py → 采集器名称 {name}
   - 类名：任意（继承 BaseCollector 即可）
   无需手动注册，只需创建文件即可

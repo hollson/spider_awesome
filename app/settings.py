@@ -60,7 +60,7 @@ class Settings:
     LOG_RETENTION: int = int(os.getenv("LOG_RETENTION", "7"))
 
     # ========== 调度（全局默认值）==========
-    # 注意：采集器调度配置在 src/collector/source_define.py 中
+    # 注意：采集器调度配置在 app/collector/source_define.py 中
     SCHEDULER_ENABLED: bool = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
     SCHEDULER_PARALLEL: bool = os.getenv("SCHEDULER_PARALLEL", "false").lower() == "true"
     MAX_WORKERS: int = int(os.getenv("MAX_WORKERS", "5"))

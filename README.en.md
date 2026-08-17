@@ -101,7 +101,7 @@ Available Commands:
 
 ```bash
 # Linux / macOS
-ENV_MODE=dev make dev
+ENV_MODE=dev make run
 ENV_MODE=prod make scheduler
 
 # Windows PowerShell
@@ -110,7 +110,7 @@ $env:ENV_MODE="prod"; make scheduler
 
 **Example Output:**
 ```bash
-$ make dev
+$ make run
 🚀  DEV MODE (SERIAL) ...
 ==================================================
   Starting spider_awesome v1.0.0
@@ -120,8 +120,8 @@ $ make dev
 ==================================================
 
 12-01 00:47:34 INF __main__:cmd_run_all:63 Running all collectors
-12-01 00:47:34 INF src.scheduler.tasks:run_all_collectors:82 [Task] Running all collectors
-12-01 19:47:34 INF src.scheduler.tasks:run_collector:28 [Task] Collecting: example_alerion
+12-01 00:47:34 INF app.scheduler.tasks:run_all_collectors:82 [Task] Running all collectors
+12-01 19:47:34 INF app.scheduler.tasks:run_collector:28 [Task] Collecting: example_alerion
 ```
 _For more details, see the [Project Documentation](docs/数据采集项目说明文档.md)_
 
