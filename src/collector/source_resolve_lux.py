@@ -20,14 +20,12 @@ from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
 
 
-class LuxAviationExampleCollector(BaseCollector):
+class LuxAviationResolver(BaseCollector):
     """
-    LuxAviation 示例采集器
+    LuxAviation 解析器
     通过 POST JSON API 获取空退航班数据（分页）
     """
 
-    OPERATOR_ID: str = "804d5f81fee1458dbf5140679f60c65c"
-    API_URL: str = "https://lms-api.luxaviation.com/ext-lead/load-emptylegs"
     HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "*/*",
@@ -51,7 +49,7 @@ class LuxAviationExampleCollector(BaseCollector):
             "region": "",
         }
         response = self.http_client.post(
-            url=self.API_URL,
+            url=self.meta.url,
             headers=self.HEADERS,
             json=payload,
         )
@@ -141,7 +139,7 @@ class LuxAviationExampleCollector(BaseCollector):
             "id": record_id,
             "source": self.name,
             "collector_name": self.name,
-            "operator_id": self.OPERATOR_ID,
+            "operator_id": self.meta.operator_id,
             "title": aircraft.get("displayName", ""),
             "tail_num": reg_num,
             "origin_code": item.get("fromIcao", ""),
@@ -158,14 +156,14 @@ class LuxAviationExampleCollector(BaseCollector):
             "seats": aircraft.get("passengers"),
             "thumb": thumb,
             "preview": preview,
-            "source_url": self.API_URL,
+            "source_url": self.meta.url,
             "raw_data": item,
         }
 
 
 def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
-    with LuxAviationExampleCollector() as collector:
+    with LuxAviationResolver() as collector:
         return collector.fetch()
 
 

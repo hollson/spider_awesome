@@ -21,17 +21,11 @@ from src.common.logger import logger
 from src.common.utils import compress_html
 
 
-class ASLExampleCollector(BaseCollector):
+class ASLResolver(BaseCollector):
     """
-    ASL Group 示例采集器
+    ASL Group 解析器
     通过 HTML 分页采集空退航班数据
     """
-
-    # 运营商 ID
-    OPERATOR_ID: str = "5da241f1177e4a41b9ae94f83b44a063"
-
-    # 基础 URL
-    BASE_URL: str = "https://www.aslgroup.eu/en/empty-legs"
 
     # 请求头
     HEADERS: dict[str, str] = {
@@ -44,7 +38,7 @@ class ASLExampleCollector(BaseCollector):
 
     def __init__(self) -> None:
         super().__init__()
-        self.current_url = self.BASE_URL
+        self.current_url = self.meta.url
 
     @property
     def name(self) -> str:
@@ -74,7 +68,7 @@ class ASLExampleCollector(BaseCollector):
         else:
             # 从 HTTP 采集
             logger.info(f"[{self.name}] 从 HTTP 采集")
-            records, next_pages = self._fetch_page(self.BASE_URL)
+            records, next_pages = self._fetch_page(self.meta.url)
             all_records.extend(records)
 
             # 处理分页
@@ -196,7 +190,7 @@ class ASLExampleCollector(BaseCollector):
             "id": record_id,
             "source": self.name,
             "collector_name": self.name,
-            "operator_id": self.OPERATOR_ID,
+            "operator_id": self.meta.operator_id,
             "title": title,
             "tail_num": None,
             "origin_code": origin_code,
@@ -213,7 +207,7 @@ class ASLExampleCollector(BaseCollector):
             "seats": seats,
             "thumb": thumb,
             "preview": None,
-            "source_url": self.BASE_URL,
+            "source_url": self.meta.url,
             "raw_data": {"route": route_text},
         }
 
@@ -237,7 +231,7 @@ class ASLExampleCollector(BaseCollector):
 # 便捷函数
 def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
-    with ASLExampleCollector() as collector:
+    with ASLResolver() as collector:
         return collector.fetch()
 
 

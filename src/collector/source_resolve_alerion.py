@@ -19,17 +19,11 @@ from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
 
 
-class AlerionExampleCollector(BaseCollector):
+class AlerionResolver(BaseCollector):
     """
-    Alerion 示例采集器
+    Alerion 解析器
     通过 POST JSON API 获取空退航班数据
     """
-
-    # 运营商 ID
-    OPERATOR_ID: str = "cc2f0c109f7811ec81a473925ff7fe99"
-
-    # API 配置
-    API_URL: str = "https://int-quoting-legacy.flyeasy.co/api/search"
 
     # 请求头
     HEADERS: dict[str, str] = {
@@ -56,7 +50,7 @@ class AlerionExampleCollector(BaseCollector):
     def _make_request(self) -> str:
         """发送请求并返回响应内容"""
         response = self.http_client.post(
-            url=self.API_URL,
+            url=self.meta.url,
             headers=self.HEADERS,
             json=self.PAYLOAD,
         )
@@ -126,7 +120,7 @@ class AlerionExampleCollector(BaseCollector):
             "id": record_id,
             "source": self.name,
             "collector_name": self.name,
-            "operator_id": self.OPERATOR_ID,
+            "operator_id": self.meta.operator_id,
             "title": ac.get("title", ""),
             "tail_num": ac.get("reg", ""),
             "origin_code": airport_from.get("icao", ""),
@@ -143,7 +137,7 @@ class AlerionExampleCollector(BaseCollector):
             "seats": ac.get("pax"),
             "thumb": next((img for img in ac.get("minImages", [])), None),
             "preview": ac.get("images", []),
-            "source_url": self.API_URL,
+            "source_url": self.meta.url,
             "raw_data": flight,
         }
 
@@ -151,7 +145,7 @@ class AlerionExampleCollector(BaseCollector):
 # 便捷函数
 def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
-    with AlerionExampleCollector() as collector:
+    with AlerionResolver() as collector:
         return collector.fetch()
 
 

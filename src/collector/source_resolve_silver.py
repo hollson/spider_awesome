@@ -21,14 +21,12 @@ from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
 
 
-class SilverExampleCollector(BaseCollector):
+class SilverResolver(BaseCollector):
     """
-    Silver 示例采集器
+    Silver 解析器
     通过 HTML 解析获取空退航班数据
     """
 
-    OPERATOR_ID: str = "a081e1cc46c64ad39f88b14de6b4ecf6"
-    URL: str = "https://portal.silverhawkaviation.com/Widgets/Flights/FlightWidget"
     HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -41,7 +39,7 @@ class SilverExampleCollector(BaseCollector):
 
     def _make_request(self) -> str:
         """发送请求获取HTML"""
-        response = self.http_client.get(url=self.URL, headers=self.HEADERS)
+        response = self.http_client.get(url=self.meta.url, headers=self.HEADERS)
         return response.text
 
     def fetch(self) -> list[dict[str, Any]]:
@@ -121,7 +119,7 @@ class SilverExampleCollector(BaseCollector):
             "id": record_id,
             "source": self.name,
             "collector_name": self.name,
-            "operator_id": self.OPERATOR_ID,
+            "operator_id": self.meta.operator_id,
             "title": title,
             "tail_num": None,
             "origin_code": origin_code,
@@ -138,7 +136,7 @@ class SilverExampleCollector(BaseCollector):
             "seats": seats,
             "thumb": images[0] if images else None,
             "preview": images,
-            "source_url": self.URL,
+            "source_url": self.meta.url,
             "raw_data": {"html": str(card)},
         }
 
@@ -185,7 +183,7 @@ class SilverExampleCollector(BaseCollector):
 
 def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
-    with SilverExampleCollector() as collector:
+    with SilverResolver() as collector:
         return collector.fetch()
 
 

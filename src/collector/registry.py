@@ -1,14 +1,17 @@
 """
 采集器注册表
 自动发现 + 配置驱动，支持动态启停
+
+配置来源：source_define.py（代码即配置）
+配置覆盖：ENV 环境变量 COLLECTOR_{NAME}_{FIELD}
 """
 
 import importlib
+import os
 from pathlib import Path
 
-import yaml
-
 from src.collector.base_collector import BaseCollector
+from src.collector.source_define import SOURCES, SourceMeta
 from src.common.logger import logger
 
 # 采集器缓存
@@ -20,16 +23,19 @@ def _discover_collectors() -> dict[str, type[BaseCollector]]:
     自动扫描 source_*.py，发现采集器
 
     约定：
-    - 文件名：source_{name}.py
+    - 文件名：source_resolve_{name}.py 或 source_{name}.py
     - 类名：任意（继承 BaseCollector 即可）
-    - name 为去掉 source_ 前缀后的部分（如 source_example_alerion → example_alerion）
+    - name 从类的 name 属性获取
+
+    注意：跳过 source_define.py（定义文件，不是采集器）
     """
     collectors = {}
     collector_dir = Path(__file__).parent
 
     for file_path in collector_dir.glob("source_*.py"):
         stem = file_path.stem
-        name = stem.replace("source_", "")
+        if stem == "source_define":
+            continue  # 跳过定义文件
 
         try:
             module = importlib.import_module(f"src.collector.{stem}")
@@ -37,59 +43,52 @@ def _discover_collectors() -> dict[str, type[BaseCollector]]:
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
                 if isinstance(attr, type) and issubclass(attr, BaseCollector) and attr is not BaseCollector:
+                    # 临时实例化以获取 name 属性
+                    temp_instance = attr()
+                    name = temp_instance.name
                     collectors[name] = attr
                     logger.trace(f"[Registry] 发现采集器: {name} -> {attr.__name__}")
                     break
         except Exception as e:
-            logger.warning(f"[Registry] 加载采集器 {name} 失败: {e}")
+            logger.warning(f"[Registry] 加载采集器 {stem} 失败: {e}")
 
     return collectors
 
 
 def _load_collector_config() -> dict:
     """
-    加载采集器配置（YAML + ENV 覆盖）
+    加载采集器配置
 
-    优先级：ENV > collectors.local.yml > collectors.yml
+    优先级：ENV > source_define.py 默认值
     """
-    import os
+    config = {}
 
-    configs_dir = Path(__file__).parent.parent.parent / "configs"
-    config = {"scheduler": {}, "collectors": {}}
+    # 1. 从 source_define.py 加载默认值
+    for name, meta in SOURCES.items():
+        config[name] = {
+            "enabled": meta.enabled,
+            "cron": meta.cron,
+            "timeout": meta.timeout,
+            "retry": meta.retry,
+            "retry_delay": meta.retry_delay,
+            "persist": meta.persist,
+        }
 
-    # 1. 加载 collectors.yml
-    base_config_file = configs_dir / "collectors.yml"
-    if base_config_file.exists():
-        with open(base_config_file, encoding="utf-8") as f:
-            base_config = yaml.safe_load(f) or {}
-            config["scheduler"] = base_config.get("scheduler", {})
-            config["collectors"] = base_config.get("collectors", {})
-
-    # 2. 加载 collectors.local.yml（覆盖）
-    local_config_file = configs_dir / "collectors.local.yml"
-    if local_config_file.exists():
-        with open(local_config_file, encoding="utf-8") as f:
-            local_config = yaml.safe_load(f) or {}
-            if "scheduler" in local_config:
-                config["scheduler"].update(local_config["scheduler"])
-            if "collectors" in local_config:
-                config["collectors"].update(local_config["collectors"])
-
-    # 3. ENV 覆盖（最高优先级）
+    # 2. ENV 覆盖（最高优先级）
+    # COLLECTOR_EXAMPLE_ALERION_ENABLED=true → example_alerion.enabled
     for key, value in os.environ.items():
         if key.startswith("COLLECTOR_"):
-            # COLLECTOR_ALERION_ENABLED=true → collectors.alerion.enabled
             parts = key.replace("COLLECTOR_", "").lower().split("_", 1)
             if len(parts) == 2:
-                name, field = parts
-                if name not in config["collectors"]:
-                    config["collectors"][name] = {}
+                collector_name, field = parts
+                if collector_name not in config:
+                    config[collector_name] = {}
                 # 类型转换
                 if value.lower() in ("true", "false"):
                     value = value.lower() == "true"
                 elif value.isdigit():
                     value = int(value)
-                config["collectors"][name][field] = value
+                config[collector_name][field] = value
 
     return config
 
@@ -102,11 +101,10 @@ def get_collector_config() -> dict:
 def get_enabled_collectors() -> list[str]:
     """获取已启用的采集器名称列表"""
     config = _load_collector_config()
-    collectors_config = config.get("collectors", {})
 
     enabled = []
-    for name, cfg in collectors_config.items():
-        if cfg.get("enabled", True):  # 默认启用
+    for name, cfg in config.items():
+        if cfg.get("enabled", True):
             enabled.append(name)
 
     return enabled
@@ -120,19 +118,25 @@ def get_collector_schedule(name: str) -> dict:
         {"cron": "0 */2 * * *", "timeout": 300, "retry": 3, ...}
     """
     config = _load_collector_config()
-    scheduler_defaults = config.get("scheduler", {})
-    collector_config = config.get("collectors", {}).get(name, {})
+    collector_config = config.get(name, {})
 
-    # 合并：采集器配置 > 调度器默认值
+    # 合并默认值
     schedule = {
-        "cron": scheduler_defaults.get("default_cron", "0 0 * * *"),
-        "timeout": scheduler_defaults.get("timeout", 300),
-        "retry": scheduler_defaults.get("retry", 3),
-        "retry_delay": scheduler_defaults.get("retry_delay", 60),
+        "cron": "0 */1 * * *",
+        "timeout": 300,
+        "retry": 3,
+        "retry_delay": 60,
     }
     schedule.update(collector_config)
 
     return schedule
+
+
+def get_source_meta(name: str) -> SourceMeta:
+    """获取指定数据源元信息"""
+    from src.collector.source_define import get_source
+
+    return get_source(name)
 
 
 def get_collectors() -> dict[str, type[BaseCollector]]:

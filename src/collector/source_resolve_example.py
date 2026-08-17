@@ -13,7 +13,7 @@ from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
 
 
-class ExampleSlowCollector(BaseCollector):
+class SlowResolver(BaseCollector):
     """慢速采集器（模拟 2s 延迟）"""
 
     SLEEP_SECONDS: float = 2
@@ -42,7 +42,7 @@ class ExampleSlowCollector(BaseCollector):
         ]
 
 
-class ExampleMediumCollector(BaseCollector):
+class MediumResolver(BaseCollector):
     """中速采集器（模拟 1s 延迟）"""
 
     SLEEP_SECONDS: float = 1
@@ -65,7 +65,7 @@ class ExampleMediumCollector(BaseCollector):
         ]
 
 
-class ExampleFastCollector(BaseCollector):
+class FastResolver(BaseCollector):
     """快速采集器（模拟 0.5s 延迟）"""
 
     SLEEP_SECONDS: float = 0.5

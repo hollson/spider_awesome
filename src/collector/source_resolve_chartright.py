@@ -21,14 +21,12 @@ from src.collector.base_collector import BaseCollector
 from src.common.logger import logger
 
 
-class ChartRightExampleCollector(BaseCollector):
+class ChartRightResolver(BaseCollector):
     """
-    ChartRight 示例采集器
+    ChartRight 解析器
     通过 HTML 解析获取空退航班数据
     """
 
-    OPERATOR_ID: str = "62a7050b3fb646c8b7011687ae7ed9a9"
-    URL: str = "https://chartright.com/empty-legs/"
     HEADERS: dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -41,7 +39,7 @@ class ChartRightExampleCollector(BaseCollector):
 
     def _make_request(self) -> str:
         """发送请求获取HTML"""
-        response = self.http_client.get(url=self.URL, headers=self.HEADERS)
+        response = self.http_client.get(url=self.meta.url, headers=self.HEADERS)
         return response.text
 
     def fetch(self) -> list[dict[str, Any]]:
@@ -136,7 +134,7 @@ class ChartRightExampleCollector(BaseCollector):
             "id": record_id,
             "source": self.name,
             "collector_name": self.name,
-            "operator_id": self.OPERATOR_ID,
+            "operator_id": self.meta.operator_id,
             "title": title,
             "tail_num": None,
             "origin_code": origin_code,
@@ -153,7 +151,7 @@ class ChartRightExampleCollector(BaseCollector):
             "seats": seats,
             "thumb": thumb,
             "preview": [thumb] if thumb else [],
-            "source_url": self.URL,
+            "source_url": self.meta.url,
             "raw_data": {"data_id": esid},
         }
 
@@ -184,7 +182,7 @@ class ChartRightExampleCollector(BaseCollector):
 
 def collect() -> list[dict[str, Any]]:
     """执行采集的便捷函数"""
-    with ChartRightExampleCollector() as collector:
+    with ChartRightResolver() as collector:
         return collector.fetch()
 
 

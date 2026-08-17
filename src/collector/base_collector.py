@@ -11,11 +11,14 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from src.common.http_client import HttpClient
 from src.common.logger import logger
 from src.common.utils import generate_id, read_file, write_file
+
+if TYPE_CHECKING:
+    from src.collector.source_define import SourceMeta
 
 
 class BaseCollector(ABC):
@@ -33,14 +36,25 @@ class BaseCollector(ABC):
     """
 
     _http_client: HttpClient | None
+    _meta: "SourceMeta | None"
 
     def __init__(self) -> None:
         self._http_client = None
+        self._meta = None
 
     @property
     def name(self) -> str:
         """采集器名称（子类必须重写）"""
         raise NotImplementedError
+
+    @property
+    def meta(self) -> "SourceMeta":
+        """获取数据源元信息（从 source_define.py 加载）"""
+        if self._meta is None:
+            from src.collector.source_define import get_source
+
+            self._meta = get_source(self.name)
+        return self._meta
 
     @property
     def http_client(self) -> HttpClient:
