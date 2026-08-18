@@ -89,7 +89,6 @@
     "**/.output": true,
     "**/.qoder": true,
     "**/.cache": true,
-    "**/logs": true,
     "**/backup": true,
     "**/_legacy": true,
     "**/dist": true,
