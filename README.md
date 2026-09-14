@@ -7,6 +7,8 @@
 <a href="https://www.chromium.org"><img src="https://img.shields.io/badge/Chromium-Headless-4285F4?logo=googlechrome&logoColor=fff" /></a>
 <p>基于分层架构的通用数据采集模板项目</p>
 <a href="README.en.md">English</a> | <a href="README.md">中文</a>
+<br/>
+<p>🌐 镜像仓库：<a href="https://gitee.com/hollson/spider_awesome">Gitee</a> | <a href="https://github.com/hollson/spider_awesome">GitHub</a></p>
 </div>
 
 <br/>
